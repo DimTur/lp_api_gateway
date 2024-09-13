@@ -5,9 +5,9 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
-	"regexp"
 
 	resp "github.com/DimTur/lp_api_gateway/internal/lib/api/response"
+	"github.com/DimTur/lp_api_gateway/internal/lib/api/validation"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator/v10"
@@ -32,44 +32,17 @@ type Response struct {
 	UserID int64 `json:"user_id,omitempty"`
 }
 
-type RegisterUser interface {
+type AuthService interface {
 	RegisterUser(ctx context.Context, email string, password string) (userID int64, err error)
 }
 
 var Validate = validator.New()
 
-var (
-	passwordRegex = map[string]*regexp.Regexp{
-		"number":  regexp.MustCompile(`[0-9]`),
-		"upper":   regexp.MustCompile(`[A-Z]`),
-		"special": regexp.MustCompile(`[!@#$%^&*]`),
-	}
-)
-
-// ValidateRegister validates register request
-func passwordValidator(fl validator.FieldLevel) bool {
-	password := fl.Field().String()
-
-	if password == "" {
-		return false
-	}
-	if len(password) < 8 {
-		return false
-	}
-	if !passwordRegex["number"].MatchString(password) ||
-		!passwordRegex["upper"].MatchString(password) ||
-		!passwordRegex["special"].MatchString(password) {
-		return false
-	}
-	return true
-}
-
 func init() {
-	// Регистрируем кастомный валидатор
-	Validate.RegisterValidation("password", passwordValidator)
+	Validate.RegisterValidation("password", validation.PasswordValidator)
 }
 
-func SingUp(log *slog.Logger, registerUser RegisterUser) http.HandlerFunc {
+func SingUp(log *slog.Logger, authService AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const op = "handlers.users.auth.SingUp"
 
@@ -83,9 +56,7 @@ func SingUp(log *slog.Logger, registerUser RegisterUser) http.HandlerFunc {
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
 			log.Error("failed to decode request body", slog.String("err", err.Error()))
-
 			render.JSON(w, r, resp.Error("failed to decode request"))
-
 			return
 		}
 
@@ -95,25 +66,19 @@ func SingUp(log *slog.Logger, registerUser RegisterUser) http.HandlerFunc {
 			validateErr := err.(validator.ValidationErrors)
 
 			log.Error("invalid request", slog.String("err", err.Error()))
-
 			render.JSON(w, r, resp.ValidationError(validateErr))
-
 			return
 		}
 
-		id, err := registerUser.RegisterUser(r.Context(), req.Email, req.Password)
+		id, err := authService.RegisterUser(r.Context(), req.Email, req.Password)
 		if errors.Is(err, ErrUserExists) {
 			log.Info("user already exists", slog.String("user", req.Email))
-
 			render.JSON(w, r, resp.Error("user already exists"))
-
 			return
 		}
 		if err != nil {
 			log.Error("failed to add user", slog.String("err", err.Error()))
-
 			render.JSON(w, r, resp.Error("failed to add user"))
-
 			return
 		}
 

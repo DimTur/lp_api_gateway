@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/DimTur/lp_api_gateway/internal/clients/sso/grpc"
+	ssogrpc "github.com/DimTur/lp_api_gateway/internal/clients/sso/grpc"
 	authhandler "github.com/DimTur/lp_api_gateway/internal/handlers/users/auth"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -16,14 +16,14 @@ type RouterConfigurator interface {
 }
 
 type ChiRouterConfigurator struct {
-	GRPCClient grpc.Client
-	Logger     *slog.Logger
+	AuthGRPCClient ssogrpc.Client
+	Logger         *slog.Logger
 }
 
-func NewChiRouterConfigurator(grpcClient grpc.Client, logger *slog.Logger) *ChiRouterConfigurator {
+func NewChiRouterConfigurator(grpcClient ssogrpc.Client, logger *slog.Logger) *ChiRouterConfigurator {
 	return &ChiRouterConfigurator{
-		GRPCClient: grpcClient,
-		Logger:     logger,
+		AuthGRPCClient: grpcClient,
+		Logger:         logger,
 	}
 }
 
@@ -50,7 +50,7 @@ func (c *ChiRouterConfigurator) ConfigureRouter() http.Handler {
 	router.Get("/health", HealthCheckHandler)
 
 	// Auth
-	router.Post("/sing_up", authhandler.SingUp(c.Logger, &c.GRPCClient))
+	router.Post("/sing_up", authhandler.SingUp(c.Logger, &c.AuthGRPCClient))
 
 	return router
 }

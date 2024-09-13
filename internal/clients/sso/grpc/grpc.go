@@ -1,4 +1,4 @@
-package grpc
+package ssogrpc
 
 import (
 	"context"
