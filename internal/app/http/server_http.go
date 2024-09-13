@@ -8,7 +8,6 @@ import (
 )
 
 const (
-	// HTTPDefaultGracefulStopTimeout - время ожидания перед завершением сервера
 	HTTPDefaultGracefulStopTimeout = 5 * time.Second
 )
 
@@ -19,10 +18,9 @@ type APIServer struct {
 	logger              *slog.Logger
 }
 
-// https://github.com/gopherschool/http-rest-api/blob/master/internal/app/apiserver/server.go
 func NewHTTPServer(
 	httpAddr string,
-	handler http.Handler,
+	router http.Handler,
 	readTimeout time.Duration,
 	writeTimeout time.Duration,
 	iddleTimeout time.Duration,
@@ -37,7 +35,7 @@ func NewHTTPServer(
 
 	httpSrv := &http.Server{
 		Addr:         httpAddr,
-		Handler:      handler,
+		Handler:      router,
 		ReadTimeout:  readTimeout,
 		WriteTimeout: writeTimeout,
 		IdleTimeout:  iddleTimeout,
