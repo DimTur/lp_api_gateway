@@ -5,6 +5,7 @@ import (
 	"time"
 
 	httpapp "github.com/DimTur/lp_api_gateway/internal/app/http"
+	"github.com/DimTur/lp_api_gateway/internal/clients/sso/grpc"
 	"github.com/DimTur/lp_api_gateway/internal/handlers"
 )
 
@@ -17,9 +18,10 @@ func NewApp(
 	readTimeout time.Duration,
 	writeTimeout time.Duration,
 	iddleTimeout time.Duration,
+	grpcClient grpc.Client,
 	logger *slog.Logger,
 ) (*App, error) {
-	routerConfigurator := &handlers.ChiRouterConfigurator{}
+	routerConfigurator := handlers.NewChiRouterConfigurator(grpcClient, logger)
 	router := routerConfigurator.ConfigureRouter()
 
 	httpServer, err := httpapp.NewHTTPServer(

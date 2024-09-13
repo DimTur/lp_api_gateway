@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"github.com/DimTur/lp_api_gateway/internal/app"
+	ssogrpc "github.com/DimTur/lp_api_gateway/internal/clients/sso/grpc"
 	"github.com/DimTur/lp_api_gateway/internal/config"
 	"github.com/spf13/cobra"
 )
@@ -29,11 +30,23 @@ func NewServeCmd() *cobra.Command {
 				return err
 			}
 
+			ssoClient, err := ssogrpc.New(
+				ctx,
+				log,
+				cfg.Clients.SSO.Address,
+				cfg.Clients.SSO.Timeout,
+				cfg.Clients.SSO.RetriesCount,
+			)
+			if err != nil {
+				return err
+			}
+
 			application, err := app.NewApp(
 				cfg.HTTPServer.Address,
 				cfg.HTTPServer.Timeout,
 				cfg.HTTPServer.Timeout,
 				cfg.HTTPServer.IddleTimeout,
+				*ssoClient,
 				log,
 			)
 			if err != nil {
@@ -47,11 +60,6 @@ func NewServeCmd() *cobra.Command {
 
 			log.Info("server listening:", slog.Any("port", cfg.HTTPServer.Address))
 			<-ctx.Done()
-
-			// closeCtx, _ := context.WithTimeout(context.Background(), time.Second)
-			// if err := httpServer.Shutdown(closeCtx); err != nil {
-			// 	log.Error("httpServer.Shutdown", slog.Any("err", err))
-			// }
 
 			httCloser()
 

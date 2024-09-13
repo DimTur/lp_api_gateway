@@ -1,4 +1,5 @@
 ./vscode
 config.yaml
+local.yaml
 commands.md
 *.db

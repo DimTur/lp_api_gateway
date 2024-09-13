@@ -83,15 +83,3 @@ func (a *APIServer) close() error {
 	a.logger.With(slog.String("op", op)).Info("stopped", slog.String("addr", a.httpAddr))
 	return nil
 }
-
-// GracefulShutdown - function for monitoring signals and server termination
-// func (a *APIServer) GracefulShutdown(closeFunc func() error) {
-// 	quit := make(chan os.Signal, 1)
-// 	signal.Notify(quit, os.Interrupt)
-// 	<-quit
-
-// 	a.logger.Info("received shutdown signal")
-// 	if err := closeFunc(); err != nil {
-// 		a.logger.Error("error during shutdown", slog.Any("err", err))
-// 	}
-// }
