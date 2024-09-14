@@ -51,6 +51,7 @@ func (c *ChiRouterConfigurator) ConfigureRouter() http.Handler {
 
 	// Auth
 	router.Post("/sing_up", authhandler.SingUp(c.Logger, &c.AuthGRPCClient))
+	router.Post("/sing_in", authhandler.SignIn(c.Logger, &c.AuthGRPCClient))
 
 	return router
 }

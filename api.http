@@ -5,3 +5,13 @@ content-type: application/json
     "email": "asdasdsdf@gmail.com",
     "password": "ASdasd!3124"
 }
+
+###
+
+POST http://localhost:8000/sing_in HTTP/1.1
+content-type: application/json
+
+{
+    "email": "asdasdsdf@gmail.com",
+    "password": "ASdasd!3124"
+}
