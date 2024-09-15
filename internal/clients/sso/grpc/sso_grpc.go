@@ -27,7 +27,7 @@ func New(
 	timeout time.Duration,
 	retriesCount int,
 ) (*Client, error) {
-	const op = "grpc.New"
+	const op = "sso.grpc.New"
 
 	retryOpts := []grpcretry.CallOption{
 		grpcretry.WithCodes(codes.NotFound, codes.Aborted, codes.DeadlineExceeded),
@@ -59,21 +59,21 @@ func New(
 }
 
 func (c *Client) RegisterUser(ctx context.Context, email string, password string) (*ssov1.RegisterUserResponse, error) {
-	const op = "grpc.RegisterUser"
+	const op = "sso.grpc.RegisterUser"
 
 	resp, err := c.api.RegisterUser(ctx, &ssov1.RegisterUserRequest{
 		Email:    email,
 		Password: password,
 	})
 	if err != nil {
-		return &ssov1.RegisterUserResponse{}, fmt.Errorf("%s: %w", op, err)
+		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
 	return resp, nil
 }
 
 func (c *Client) LoginUser(ctx context.Context, email string, password string) (*ssov1.LoginUserResponse, error) {
-	const op = "grpc.LoginUser"
+	const op = "sso.grpc.LoginUser"
 
 	resp, err := c.api.LoginUser(ctx, &ssov1.LoginUserRequest{
 		Email:    email,
@@ -100,7 +100,7 @@ func (c *Client) LoginUser(ctx context.Context, email string, password string) (
 }
 
 func (c *Client) AuthCheck(ctx context.Context, accessToken string) (*ssov1.AuthCheckResponse, error) {
-	const op = "grpc.AuthCheck"
+	const op = "sso.grpc.AuthCheck"
 
 	resp, err := c.api.AuthCheck(ctx, &ssov1.AuthCheckRequest{
 		AccessToken: accessToken,
