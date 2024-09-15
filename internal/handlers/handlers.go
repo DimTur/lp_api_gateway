@@ -65,13 +65,8 @@ func (c *ChiRouterConfigurator) ConfigureRouter() http.Handler {
 	router.Group(func(r chi.Router) {
 		r.Use(authmiddleware.AuthMiddleware(&c.AuthGRPCClient))
 		r.Post("/create_channel", channelshandler.CreateChannel(c.Logger, &c.LPGRPCClient))
-		r.Get("/protected", ProtectedHandler)
+		r.Get("/get_channel/{id}", channelshandler.GetChannel(c.Logger, &c.LPGRPCClient))
 	})
 
 	return router
-}
-
-// Test handler
-func ProtectedHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("This is a protected route"))
 }

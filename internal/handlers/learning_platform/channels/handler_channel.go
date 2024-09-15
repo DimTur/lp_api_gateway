@@ -9,15 +9,19 @@ import (
 
 	resp "github.com/DimTur/lp_api_gateway/internal/lib/api/response"
 	lpv1 "github.com/DimTur/lp_protos/gen/go/lp"
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator/v10"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 var (
 	ErrInvalidCredentials = errors.New("invalid credentials")
 	ErrInvalidChannelID   = errors.New("invalid channel id")
 	ErrChannelExitsts     = errors.New("channel already exists")
+	ErrChannelNotFound    = errors.New("channel not found")
 )
 
 type CreateChannelRequest struct {
@@ -38,10 +42,11 @@ type GetChannelRequest struct {
 
 type GetChannelResponce struct {
 	resp.Response
-	Name        string `json:"name" validate:"required,name"`
-	Description string `json:"description" validate:"required,description"`
-	UserID      int64  `json:"user_id" validate:"required,user_id"`
-	Public      bool   `json:"public" validate:"required,public"`
+	Name           string `json:"name" validate:"required,name"`
+	Description    string `json:"description" validate:"required,description"`
+	CreatedBy      int64  `json:"created_by" validate:"required,created_by"`
+	LastModifiedBy int64  `json:"last_modified_by" validate:"required,last_modified_by"`
+	Public         bool   `json:"public" validate:"required,public"`
 }
 
 type LPService interface {
@@ -85,8 +90,8 @@ func CreateChannel(log *slog.Logger, lpService LPService) http.HandlerFunc {
 		err = render.DecodeJSON(r.Body, &req)
 		if err != nil {
 			log.Error("failed to decode request body", slog.String("err", err.Error()))
-			render.JSON(w, r, resp.Error("failed to decode request"))
 			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, resp.Error("failed to decode request"))
 			return
 		}
 
@@ -96,8 +101,8 @@ func CreateChannel(log *slog.Logger, lpService LPService) http.HandlerFunc {
 			validateErr := err.(validator.ValidationErrors)
 
 			log.Error("invalid request", slog.String("err", err.Error()))
-			render.JSON(w, r, resp.ValidationError(validateErr))
 			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, resp.ValidationError(validateErr))
 			return
 		}
 
@@ -108,16 +113,19 @@ func CreateChannel(log *slog.Logger, lpService LPService) http.HandlerFunc {
 			userID,
 			req.Public,
 		)
-		if errors.Is(err, ErrChannelExitsts) {
-			log.Info("channel already exists", slog.String("user", req.Name))
-			render.JSON(w, r, resp.Error("channel already exists"))
-			w.WriteHeader(http.StatusConflict)
-			return
-		}
 		if err != nil {
+			if st, ok := status.FromError(err); ok {
+				if st.Code() == codes.InvalidArgument {
+					log.Error("invalid credentials", slog.Any("channel", req))
+					w.WriteHeader(http.StatusBadRequest)
+					render.JSON(w, r, resp.Error("invalid credentials"))
+					return
+				}
+			}
+
 			log.Error("failed to create channel", slog.String("err", err.Error()))
-			render.JSON(w, r, resp.Error("failed to create channel"))
 			w.WriteHeader(http.StatusInternalServerError)
+			render.JSON(w, r, resp.Error("failed to create channel"))
 			return
 		}
 
@@ -128,5 +136,58 @@ func CreateChannel(log *slog.Logger, lpService LPService) http.HandlerFunc {
 			ChannelID: respID.Channel.ChannelId,
 		})
 		w.WriteHeader(http.StatusCreated)
+	}
+}
+
+func GetChannel(log *slog.Logger, lpService LPService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		const op = "handlers.learning_platform.channels.GetChannel"
+
+		log = log.With(
+			slog.String("op", op),
+			slog.String("request_id", middleware.GetReqID(r.Context())),
+		)
+
+		channelIDStr := chi.URLParam(r, "id")
+		if channelIDStr == "" {
+			log.Error("missing channel ID in query params")
+			http.Error(w, "Bad Request", http.StatusBadRequest)
+			return
+		}
+
+		channelID, err := strconv.ParseInt(channelIDStr, 10, 64)
+		if err != nil {
+			log.Error("invalid channel ID in query params", slog.String("err", err.Error()))
+			http.Error(w, "Bad Request", http.StatusBadRequest)
+			return
+		}
+
+		channel, err := lpService.GetChannel(r.Context(), channelID)
+		if err != nil {
+			if st, ok := status.FromError(err); ok {
+				if st.Code() == codes.NotFound {
+					log.Error("channel not found", slog.Int64("channel_id", channelID))
+					w.WriteHeader(http.StatusNotFound)
+					render.JSON(w, r, resp.Error("channel does not exist"))
+					return
+				}
+			}
+
+			log.Error("failed to get channel", slog.String("err", err.Error()))
+			w.WriteHeader(http.StatusInternalServerError)
+			render.JSON(w, r, resp.Error("Internal Server Error"))
+			return
+		}
+
+		log.Info("channel retrieved", slog.Int64("channel_id", channelID))
+
+		render.JSON(w, r, GetChannelResponce{
+			Response:       resp.OK(),
+			Name:           channel.Channel.Name,
+			Description:    channel.Channel.Description,
+			CreatedBy:      channel.Channel.CreatedBy,
+			LastModifiedBy: channel.Channel.LastModifiedBy,
+			Public:         channel.Channel.Public,
+		})
 	}
 }

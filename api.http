@@ -26,3 +26,8 @@ Authorization: eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjY0MjYxNjIsImlh
     "description": "do consectetur deserunt dolor",
     "public": true
 }
+
+###
+Get http://localhost:8000/get_channel/2 HTTP/1.1
+content-type: application/json
+Authorization: eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjY0MjYxNjIsImlhdCI6MTcyNjM5MDE2MiwiaXNzIjoiYXV0aC1zZXJ2aWNlIiwic3ViIjozLCJ0eXBlIjoiYWNjZXNzIn0.GghXcgkWomxrEt7acL6YY5EJ_dmcwz6i1L55KyOBgLrVTQD2v6Q_Mx6oJHZt8vF3D72TEt6PnE6CI0cHirp3DQ

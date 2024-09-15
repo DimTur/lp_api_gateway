@@ -49,6 +49,8 @@ func ValidationError(errs validator.ValidationErrors) Response {
 			errMsgs = append(errMsgs, fmt.Sprintf("field %s is not a valid UserID", err.Field()))
 		case "public":
 			errMsgs = append(errMsgs, fmt.Sprintf("field %s is not a valid Public", err.Field()))
+		case "channel_id":
+			errMsgs = append(errMsgs, fmt.Sprintf("field %s is not a valid ChannelID", err.Field()))
 		default:
 			errMsgs = append(errMsgs, fmt.Sprintf("field %s is not valid", err.Field()))
 		}
