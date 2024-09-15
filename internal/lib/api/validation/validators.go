@@ -14,7 +14,6 @@ var (
 	}
 )
 
-// ValidateRegister validates register request
 func PasswordValidator(fl validator.FieldLevel) bool {
 	password := fl.Field().String()
 

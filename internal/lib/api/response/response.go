@@ -41,6 +41,14 @@ func ValidationError(errs validator.ValidationErrors) Response {
 			errMsgs = append(errMsgs, fmt.Sprintf("field %s is not a valid Email", err.Field()))
 		case "password":
 			errMsgs = append(errMsgs, fmt.Sprintf("field %s is not a valid Password", err.Field()))
+		case "name":
+			errMsgs = append(errMsgs, fmt.Sprintf("field %s is not a valid Name", err.Field()))
+		case "description":
+			errMsgs = append(errMsgs, fmt.Sprintf("field %s is not a valid Description", err.Field()))
+		case "user_id":
+			errMsgs = append(errMsgs, fmt.Sprintf("field %s is not a valid UserID", err.Field()))
+		case "public":
+			errMsgs = append(errMsgs, fmt.Sprintf("field %s is not a valid Public", err.Field()))
 		default:
 			errMsgs = append(errMsgs, fmt.Sprintf("field %s is not valid", err.Field()))
 		}

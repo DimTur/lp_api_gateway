@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"time"
 
+	lpgrpc "github.com/DimTur/lp_api_gateway/internal/clients/lp/grpc"
 	ssogrpc "github.com/DimTur/lp_api_gateway/internal/clients/sso/grpc"
+	channelshandler "github.com/DimTur/lp_api_gateway/internal/handlers/learning_platform/channels"
 	authmiddleware "github.com/DimTur/lp_api_gateway/internal/handlers/middleware/auth"
 	authhandler "github.com/DimTur/lp_api_gateway/internal/handlers/users/auth"
 	"github.com/go-chi/chi/v5"
@@ -20,12 +22,14 @@ type RouterConfigurator interface {
 
 type ChiRouterConfigurator struct {
 	AuthGRPCClient ssogrpc.Client
+	LPGRPCClient   lpgrpc.Client
 	Logger         *slog.Logger
 }
 
-func NewChiRouterConfigurator(grpcClient ssogrpc.Client, logger *slog.Logger) *ChiRouterConfigurator {
+func NewChiRouterConfigurator(authGRPCClient ssogrpc.Client, lpGRPCClient lpgrpc.Client, logger *slog.Logger) *ChiRouterConfigurator {
 	return &ChiRouterConfigurator{
-		AuthGRPCClient: grpcClient,
+		AuthGRPCClient: authGRPCClient,
+		LPGRPCClient:   lpGRPCClient,
 		Logger:         logger,
 	}
 }
@@ -60,6 +64,7 @@ func (c *ChiRouterConfigurator) ConfigureRouter() http.Handler {
 	// Learning Platform
 	router.Group(func(r chi.Router) {
 		r.Use(authmiddleware.AuthMiddleware(&c.AuthGRPCClient))
+		r.Post("/create_channel", channelshandler.CreateChannel(c.Logger, &c.LPGRPCClient))
 		r.Get("/protected", ProtectedHandler)
 	})
 

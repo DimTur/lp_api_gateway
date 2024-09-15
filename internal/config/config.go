@@ -27,6 +27,7 @@ type Client struct {
 
 type ClientsConfig struct {
 	SSO Client `yaml:"sso"`
+	LP  Client `yaml:"lp"`
 }
 
 func Parse(s string) (*Config, error) {

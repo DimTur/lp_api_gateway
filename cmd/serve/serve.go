@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"github.com/DimTur/lp_api_gateway/internal/app"
+	lpgrpc "github.com/DimTur/lp_api_gateway/internal/clients/lp/grpc"
 	ssogrpc "github.com/DimTur/lp_api_gateway/internal/clients/sso/grpc"
 	"github.com/DimTur/lp_api_gateway/internal/config"
 	"github.com/spf13/cobra"
@@ -41,12 +42,24 @@ func NewServeCmd() *cobra.Command {
 				return err
 			}
 
+			lpClient, err := lpgrpc.New(
+				ctx,
+				log,
+				cfg.Clients.LP.Address,
+				cfg.Clients.LP.Timeout,
+				cfg.Clients.LP.RetriesCount,
+			)
+			if err != nil {
+				return err
+			}
+
 			application, err := app.NewApp(
 				cfg.HTTPServer.Address,
 				cfg.HTTPServer.Timeout,
 				cfg.HTTPServer.Timeout,
 				cfg.HTTPServer.IddleTimeout,
 				*ssoClient,
+				*lpClient,
 				log,
 			)
 			if err != nil {
