@@ -3,3 +3,4 @@ config.yaml
 local.yaml
 commands.md
 *.db
+hw.md

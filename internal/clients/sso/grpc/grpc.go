@@ -54,6 +54,7 @@ func New(
 
 	return &Client{
 		api: ssov1.NewAuthClient(cc),
+		log: log,
 	}, nil
 }
 
@@ -95,6 +96,22 @@ func (c *Client) LoginUser(ctx context.Context, email string, password string) (
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
+	return resp, nil
+}
+
+func (c *Client) AuthCheck(ctx context.Context, accessToken string) (*ssov1.AuthCheckResponse, error) {
+	const op = "grpc.AuthCheck"
+
+	resp, err := c.api.AuthCheck(ctx, &ssov1.AuthCheckRequest{
+		AccessToken: accessToken,
+	})
+	if err != nil {
+		st, ok := status.FromError(err)
+		if ok {
+			return nil, fmt.Errorf("%s: unauth: %s", op, st.Message())
+		}
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
 	return resp, nil
 }
 
