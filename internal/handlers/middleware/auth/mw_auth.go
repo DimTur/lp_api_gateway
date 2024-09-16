@@ -17,12 +17,14 @@ func AuthMiddleware(authService AuthService) func(next http.Handler) http.Handle
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			accessToken := r.Header.Get("Authorization")
 			if accessToken == "" {
+				w.WriteHeader(http.StatusUnauthorized)
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
 
 			resp, err := authService.AuthCheck(r.Context(), accessToken)
 			if err != nil || !resp.IsValid {
+				w.WriteHeader(http.StatusUnauthorized)
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}

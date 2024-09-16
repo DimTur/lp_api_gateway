@@ -71,6 +71,7 @@ func SingUp(log *slog.Logger, authService AuthService) http.HandlerFunc {
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
 			log.Error("failed to decode request body", slog.String("err", err.Error()))
+			w.WriteHeader(http.StatusBadRequest)
 			render.JSON(w, r, resp.Error("failed to decode request"))
 			return
 		}
@@ -81,18 +82,24 @@ func SingUp(log *slog.Logger, authService AuthService) http.HandlerFunc {
 			validateErr := err.(validator.ValidationErrors)
 
 			log.Error("invalid request", slog.String("err", err.Error()))
+			w.WriteHeader(http.StatusBadRequest)
 			render.JSON(w, r, resp.ValidationError(validateErr))
 			return
 		}
 
 		respID, err := authService.RegisterUser(r.Context(), req.Email, req.Password)
-		if errors.Is(err, ErrUserExists) {
-			log.Info("user already exists", slog.String("user", req.Email))
-			render.JSON(w, r, resp.Error("user already exists"))
-			return
-		}
 		if err != nil {
+			if st, ok := status.FromError(err); ok {
+				if st.Code() == codes.AlreadyExists {
+					log.Error("user already exists", slog.Any("channel", req))
+					w.WriteHeader(http.StatusBadRequest)
+					render.JSON(w, r, resp.Error("user already exists"))
+					return
+				}
+			}
+
 			log.Error("failed to add user", slog.String("err", err.Error()))
+			w.WriteHeader(http.StatusInternalServerError)
 			render.JSON(w, r, resp.Error("failed to add user"))
 			return
 		}
@@ -120,6 +127,7 @@ func SignIn(log *slog.Logger, authService AuthService) http.HandlerFunc {
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
 			log.Error("failed to decode request body", slog.String("err", err.Error()))
+			w.WriteHeader(http.StatusBadRequest)
 			render.JSON(w, r, resp.Error("failed to decode request"))
 			return
 		}
@@ -130,6 +138,7 @@ func SignIn(log *slog.Logger, authService AuthService) http.HandlerFunc {
 			validateErr := err.(validator.ValidationErrors)
 
 			log.Error("invalid request", slog.String("err", err.Error()))
+			w.WriteHeader(http.StatusBadRequest)
 			render.JSON(w, r, resp.ValidationError(validateErr))
 			return
 		}
@@ -141,24 +150,29 @@ func SignIn(log *slog.Logger, authService AuthService) http.HandlerFunc {
 				switch st.Code() {
 				case codes.Unauthenticated:
 					log.Info("invalid email or password", slog.String("email", req.Email))
+					w.WriteHeader(http.StatusBadRequest)
 					render.JSON(w, r, resp.Error("invalid email or password"))
 					return
 				case codes.InvalidArgument:
 					log.Error("invalid input", slog.String("err", st.Message()))
+					w.WriteHeader(http.StatusBadRequest)
 					render.JSON(w, r, resp.Error("invalid input"))
 					return
 				case codes.Internal:
 					log.Error("internal server error", slog.String("err", st.Message()))
+					w.WriteHeader(http.StatusInternalServerError)
 					render.JSON(w, r, resp.Error("internal server error"))
 					return
 				default:
 					log.Error("unexpected error", slog.String("err", st.Message()))
+					w.WriteHeader(http.StatusBadRequest)
 					render.JSON(w, r, resp.Error("unexpected error"))
 					return
 				}
 			}
 
 			log.Error("failed to login user", slog.String("err", err.Error()))
+			w.WriteHeader(http.StatusInternalServerError)
 			render.JSON(w, r, resp.Error("failed to login user"))
 			return
 		}
