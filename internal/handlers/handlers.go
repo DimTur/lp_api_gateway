@@ -67,7 +67,7 @@ func (c *ChiRouterConfigurator) ConfigureRouter() http.Handler {
 
 	// Learning Platform
 	router.Group(func(r chi.Router) {
-		r.Use(authmiddleware.AuthMiddleware(&c.AuthGRPCClient))
+		r.Use(authmiddleware.AuthMiddleware(c.Logger, &c.AuthGRPCClient))
 		r.Post("/create_channel", channelshandler.CreateChannel(c.Logger, &c.LPGRPCClient))
 		r.Get("/get_channel/{id}", channelshandler.GetChannel(c.Logger, &c.LPGRPCClient))
 	})

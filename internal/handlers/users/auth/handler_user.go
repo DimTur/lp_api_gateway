@@ -168,7 +168,6 @@ func SignIn(log *slog.Logger, authService AuthService) http.HandlerFunc {
 
 		singInResponse, err := authService.LoginUser(r.Context(), req.Email, req.Password)
 		if err != nil {
-			log.Error("received error from auth service", slog.String("err", err.Error()))
 			st, ok := status.FromError(err)
 			if ok {
 				switch st.Code() {
