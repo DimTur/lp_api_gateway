@@ -1,0 +1,244 @@
+basePath: /
+definitions:
+  authhandler.SingInRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  authhandler.SingInResponse:
+    properties:
+      access_token:
+        type: string
+      error:
+        type: string
+      refresh_token:
+        type: string
+      status:
+        type: string
+    type: object
+  authhandler.SingUpRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  authhandler.SingUpResponse:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  channelshandler.CreateChannelRequest:
+    properties:
+      description:
+        minLength: 10
+        type: string
+      name:
+        maxLength: 50
+        minLength: 3
+        type: string
+      public:
+        description: UserID      int64  `json:"user_id" validate:"required,numeric"`
+        type: boolean
+    required:
+    - description
+    - name
+    - public
+    type: object
+  channelshandler.CreateChannelResponce:
+    properties:
+      channel_id:
+        type: integer
+      error:
+        type: string
+      status:
+        type: string
+    type: object
+  channelshandler.GetChannelResponce:
+    properties:
+      created_by:
+        type: integer
+      description:
+        type: string
+      error:
+        type: string
+      last_modified_by:
+        type: integer
+      name:
+        type: string
+      public:
+        type: boolean
+      status:
+        type: string
+    required:
+    - created_by
+    - description
+    - last_modified_by
+    - name
+    - public
+    type: object
+  response.Response:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+    type: object
+host: localhost:8000
+info:
+  contact:
+    name: API Support
+  description: The project is only in its initial stages.
+  title: Learning Platform API
+  version: 0.1.0
+paths:
+  /create_channel:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint allows users to create a new channel with the specified
+        data.
+      parameters:
+      - description: User ID
+        in: header
+        name: X-User-ID
+        required: true
+        type: string
+      - description: Channel creation parameters
+        in: body
+        name: CreateChannelRequest
+        required: true
+        schema:
+          $ref: '#/definitions/channelshandler.CreateChannelRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/channelshandler.CreateChannelResponce'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Create a new channel
+      tags:
+      - channels
+  /get_channel/{id}:
+    get:
+      consumes:
+      - application/json
+      description: This endpoint returns channel information by ID.
+      parameters:
+      - description: ID канала
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/channelshandler.GetChannelResponce'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Channel not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get channel information
+      tags:
+      - channels
+  /sing_in:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint allows users to sign in using their email and password.
+      parameters:
+      - description: Sign-in parameters
+        in: body
+        name: SingInRequest
+        required: true
+        schema:
+          $ref: '#/definitions/authhandler.SingInRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/authhandler.SingInResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: User Login
+      tags:
+      - auth
+  /sing_up:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint allows users to register with an email and password.
+      parameters:
+      - description: Registration parameters
+        in: body
+        name: SingUpRequest
+        required: true
+        schema:
+          $ref: '#/definitions/authhandler.SingUpRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/authhandler.SingUpResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Register a new user
+      tags:
+      - auth
+swagger: "2.0"

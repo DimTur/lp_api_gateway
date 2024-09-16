@@ -12,7 +12,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/status"
 )
 
 type Client struct {
@@ -66,6 +65,7 @@ func (c *Client) RegisterUser(ctx context.Context, email string, password string
 		Password: password,
 	})
 	if err != nil {
+		c.log.Error("received error from auth grpc service", slog.String("err", err.Error()))
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -80,19 +80,7 @@ func (c *Client) LoginUser(ctx context.Context, email string, password string) (
 		Password: password,
 	})
 	if err != nil {
-		st, ok := status.FromError(err)
-		if ok {
-			switch st.Code() {
-			case codes.Unauthenticated:
-				return nil, fmt.Errorf("%s: authentication failed: %s", op, st.Message())
-			case codes.InvalidArgument:
-				return nil, fmt.Errorf("%s: invalid input: %s", op, st.Message())
-			case codes.Internal:
-				return nil, fmt.Errorf("%s: internal server error: %s", op, st.Message())
-			default:
-				return nil, fmt.Errorf("%s: unexpected error: %s", op, st.Message())
-			}
-		}
+		c.log.Error("received error from auth grpc service", slog.String("err", err.Error()))
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -106,10 +94,7 @@ func (c *Client) AuthCheck(ctx context.Context, accessToken string) (*ssov1.Auth
 		AccessToken: accessToken,
 	})
 	if err != nil {
-		st, ok := status.FromError(err)
-		if ok {
-			return nil, fmt.Errorf("%s: unauth: %s", op, st.Message())
-		}
+		c.log.Error("received error from auth grpc service", slog.String("err", err.Error()))
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 	return resp, nil

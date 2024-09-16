@@ -14,6 +14,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/httprate"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 type RouterConfigurator interface {
@@ -56,6 +57,9 @@ func (c *ChiRouterConfigurator) ConfigureRouter() http.Handler {
 	//
 	// Server health cheker
 	router.Get("/health", HealthCheckHandler)
+
+	// Swagger
+	router.Get("/swagger/*", httpSwagger.WrapHandler)
 
 	// Auth
 	router.Post("/sing_up", authhandler.SingUp(c.Logger, &c.AuthGRPCClient))

@@ -5,8 +5,17 @@ import (
 	"log"
 
 	"github.com/DimTur/lp_api_gateway/cmd/serve"
+	_ "github.com/DimTur/lp_api_gateway/docs"
 )
 
+// @title           Learning Platform API
+// @version         0.1.0
+// @description     The project is only in its initial stages.
+
+// @contact.name   API Support
+
+// @host      localhost:8000
+// @BasePath  /
 func main() {
 	ctx := context.Background()
 

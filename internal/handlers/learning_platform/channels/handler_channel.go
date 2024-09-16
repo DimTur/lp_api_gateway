@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
-	resp "github.com/DimTur/lp_api_gateway/internal/lib/api/response"
+	"github.com/DimTur/lp_api_gateway/internal/lib/api/response"
 	lpv1 "github.com/DimTur/lp_protos/gen/go/lp"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -32,7 +32,7 @@ type CreateChannelRequest struct {
 }
 
 type CreateChannelResponce struct {
-	resp.Response
+	response.Response
 	ChannelID int64 `json:"channel_id,omitempty"`
 }
 
@@ -41,7 +41,7 @@ type GetChannelRequest struct {
 }
 
 type GetChannelResponce struct {
-	resp.Response
+	response.Response
 	Name           string `json:"name" validate:"required,name"`
 	Description    string `json:"description" validate:"required,description"`
 	CreatedBy      int64  `json:"created_by" validate:"required,created_by"`
@@ -62,6 +62,19 @@ type LPService interface {
 
 var Validate = validator.New()
 
+// CreateChannel godoc
+// @Summary      Create a new channel
+// @Description  This endpoint allows users to create a new channel with the specified data.
+// @Tags         channels
+// @Accept       json
+// @Produce      json
+// @Param        X-User-ID header string true "User ID"
+// @Param        CreateChannelRequest body channelshandler.CreateChannelRequest true "Channel creation parameters"
+// @Success      201 {object} channelshandler.CreateChannelResponce
+// @Failure      400 {object} response.Response "Invalid data in the request"
+// @Failure      401 {string} string "Unauthorized"
+// @Failure      500 {object} response.Response "Server error"
+// @Router       /create_channel [post]
 func CreateChannel(log *slog.Logger, lpService LPService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const op = "handlers.learning_platform.channels.CreateChannel"
@@ -91,7 +104,7 @@ func CreateChannel(log *slog.Logger, lpService LPService) http.HandlerFunc {
 		if err != nil {
 			log.Error("failed to decode request body", slog.String("err", err.Error()))
 			w.WriteHeader(http.StatusBadRequest)
-			render.JSON(w, r, resp.Error("failed to decode request"))
+			render.JSON(w, r, response.Error("failed to decode request"))
 			return
 		}
 
@@ -102,7 +115,7 @@ func CreateChannel(log *slog.Logger, lpService LPService) http.HandlerFunc {
 
 			log.Error("invalid request", slog.String("err", err.Error()))
 			w.WriteHeader(http.StatusBadRequest)
-			render.JSON(w, r, resp.ValidationError(validateErr))
+			render.JSON(w, r, response.ValidationError(validateErr))
 			return
 		}
 
@@ -118,27 +131,39 @@ func CreateChannel(log *slog.Logger, lpService LPService) http.HandlerFunc {
 				if st.Code() == codes.InvalidArgument {
 					log.Error("invalid credentials", slog.Any("channel", req))
 					w.WriteHeader(http.StatusBadRequest)
-					render.JSON(w, r, resp.Error("invalid credentials"))
+					render.JSON(w, r, response.Error("invalid credentials"))
 					return
 				}
 			}
 
 			log.Error("failed to create channel", slog.String("err", err.Error()))
 			w.WriteHeader(http.StatusInternalServerError)
-			render.JSON(w, r, resp.Error("failed to create channel"))
+			render.JSON(w, r, response.Error("failed to create channel"))
 			return
 		}
 
 		log.Info("channel created", slog.Int64("id", respID.Channel.ChannelId))
 
 		render.JSON(w, r, CreateChannelResponce{
-			Response:  resp.OK(),
+			Response:  response.OK(),
 			ChannelID: respID.Channel.ChannelId,
 		})
 		w.WriteHeader(http.StatusCreated)
 	}
 }
 
+// GetChannel godoc
+// @Summary      Get channel information
+// @Description  This endpoint returns channel information by ID.
+// @Tags         channels
+// @Accept       json
+// @Produce      json
+// @Param        id path int true "ID канала"
+// @Success      200 {object} channelshandler.GetChannelResponce
+// @Failure      400 {object} response.Response "Invalid data in the request"
+// @Failure      404 {object} response.Response "Channel not found"
+// @Failure      500 {object} response.Response "Server error"
+// @Router       /get_channel/{id} [get]
 func GetChannel(log *slog.Logger, lpService LPService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const op = "handlers.learning_platform.channels.GetChannel"
@@ -168,21 +193,21 @@ func GetChannel(log *slog.Logger, lpService LPService) http.HandlerFunc {
 				if st.Code() == codes.NotFound {
 					log.Error("channel not found", slog.Int64("channel_id", channelID))
 					w.WriteHeader(http.StatusNotFound)
-					render.JSON(w, r, resp.Error("channel does not exist"))
+					render.JSON(w, r, response.Error("channel does not exist"))
 					return
 				}
 			}
 
 			log.Error("failed to get channel", slog.String("err", err.Error()))
 			w.WriteHeader(http.StatusInternalServerError)
-			render.JSON(w, r, resp.Error("Internal Server Error"))
+			render.JSON(w, r, response.Error("Internal Server Error"))
 			return
 		}
 
 		log.Info("channel retrieved", slog.Int64("channel_id", channelID))
 
 		render.JSON(w, r, GetChannelResponce{
-			Response:       resp.OK(),
+			Response:       response.OK(),
 			Name:           channel.Channel.Name,
 			Description:    channel.Channel.Description,
 			CreatedBy:      channel.Channel.CreatedBy,

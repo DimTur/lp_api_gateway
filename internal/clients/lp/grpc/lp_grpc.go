@@ -75,6 +75,7 @@ func (c *Client) CreateChannel(ctx context.Context,
 		Channel: channel,
 	})
 	if err != nil {
+		c.log.Error("received error from auth grpc service", slog.String("err", err.Error()))
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -88,6 +89,7 @@ func (c *Client) GetChannel(ctx context.Context, channelID int64) (*lpv1.GetChan
 		ChannelId: channelID,
 	})
 	if err != nil {
+		c.log.Error("received error from auth grpc service", slog.String("err", err.Error()))
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
