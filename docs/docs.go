@@ -19,6 +19,11 @@ const docTemplate = `{
     "paths": {
         "/create_channel": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "This endpoint allows users to create a new channel with the specified data.",
                 "consumes": [
                     "application/json"
@@ -31,13 +36,6 @@ const docTemplate = `{
                 ],
                 "summary": "Create a new channel",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "X-User-ID",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "Channel creation parameters",
                         "name": "CreateChannelRequest",
@@ -78,6 +76,11 @@ const docTemplate = `{
         },
         "/get_channel/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "This endpoint returns channel information by ID.",
                 "consumes": [
                     "application/json"
@@ -368,7 +371,19 @@ const docTemplate = `{
                 }
             }
         }
-    }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    },
+    "security": [
+        {
+            "ApiKeyAuth": []
+        }
+    ]
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it

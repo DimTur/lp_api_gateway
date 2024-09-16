@@ -111,11 +111,6 @@ paths:
       description: This endpoint allows users to create a new channel with the specified
         data.
       parameters:
-      - description: User ID
-        in: header
-        name: X-User-ID
-        required: true
-        type: string
       - description: Channel creation parameters
         in: body
         name: CreateChannelRequest
@@ -141,6 +136,8 @@ paths:
           description: Server error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Create a new channel
       tags:
       - channels
@@ -174,6 +171,8 @@ paths:
           description: Server error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Get channel information
       tags:
       - channels
@@ -241,4 +240,11 @@ paths:
       summary: Register a new user
       tags:
       - auth
+security:
+- ApiKeyAuth: []
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

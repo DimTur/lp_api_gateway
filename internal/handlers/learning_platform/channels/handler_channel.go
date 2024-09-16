@@ -68,13 +68,13 @@ var Validate = validator.New()
 // @Tags         channels
 // @Accept       json
 // @Produce      json
-// @Param        X-User-ID header string true "User ID"
 // @Param        CreateChannelRequest body channelshandler.CreateChannelRequest true "Channel creation parameters"
 // @Success      201 {object} channelshandler.CreateChannelResponce
 // @Failure      400 {object} response.Response "Invalid data in the request"
 // @Failure      401 {string} string "Unauthorized"
 // @Failure      500 {object} response.Response "Server error"
 // @Router       /create_channel [post]
+// @Security ApiKeyAuth
 func CreateChannel(log *slog.Logger, lpService LPService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const op = "handlers.learning_platform.channels.CreateChannel"
@@ -164,6 +164,7 @@ func CreateChannel(log *slog.Logger, lpService LPService) http.HandlerFunc {
 // @Failure      404 {object} response.Response "Channel not found"
 // @Failure      500 {object} response.Response "Server error"
 // @Router       /get_channel/{id} [get]
+// @Security ApiKeyAuth
 func GetChannel(log *slog.Logger, lpService LPService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const op = "handlers.learning_platform.channels.GetChannel"
