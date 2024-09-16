@@ -12,6 +12,8 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator/v10"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -77,6 +79,10 @@ func SingUp(log *slog.Logger, authService AuthService) http.HandlerFunc {
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
+		tracer := otel.Tracer("AuthTracer")
+		_, span := tracer.Start(r.Context(), "SingUp")
+		defer span.End()
+
 		var req SingUpRequest
 
 		err := render.DecodeJSON(r.Body, &req)
@@ -89,6 +95,7 @@ func SingUp(log *slog.Logger, authService AuthService) http.HandlerFunc {
 
 		log.Info("request body decoded", slog.Any("request", req))
 
+		span.AddEvent("validation_started")
 		if err := Validate.Struct(req); err != nil {
 			validateErr := err.(validator.ValidationErrors)
 
@@ -97,7 +104,10 @@ func SingUp(log *slog.Logger, authService AuthService) http.HandlerFunc {
 			render.JSON(w, r, response.ValidationError(validateErr))
 			return
 		}
+		span.AddEvent("validation_completed")
+		span.SetAttributes(attribute.String("email", req.Email))
 
+		span.AddEvent("started_user_registering")
 		respID, err := authService.RegisterUser(r.Context(), req.Email, req.Password)
 		if err != nil {
 			if st, ok := status.FromError(err); ok {
@@ -114,6 +124,8 @@ func SingUp(log *slog.Logger, authService AuthService) http.HandlerFunc {
 			render.JSON(w, r, response.Error("failed to add user"))
 			return
 		}
+		span.AddEvent("completed_user_registering")
+		span.SetAttributes(attribute.String("channel", req.Email))
 
 		log.Info("user registered", slog.Int64("id", respID.UserId))
 
@@ -145,6 +157,10 @@ func SignIn(log *slog.Logger, authService AuthService) http.HandlerFunc {
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
+		tracer := otel.Tracer("AuthTracer")
+		_, span := tracer.Start(r.Context(), "SignIn")
+		defer span.End()
+
 		var req SingInRequest
 
 		err := render.DecodeJSON(r.Body, &req)
@@ -157,6 +173,7 @@ func SignIn(log *slog.Logger, authService AuthService) http.HandlerFunc {
 
 		log.Info("request body decoded", slog.Any("request", req))
 
+		span.AddEvent("validation_started")
 		if err := Validate.Struct(req); err != nil {
 			validateErr := err.(validator.ValidationErrors)
 
@@ -165,7 +182,10 @@ func SignIn(log *slog.Logger, authService AuthService) http.HandlerFunc {
 			render.JSON(w, r, response.ValidationError(validateErr))
 			return
 		}
+		span.AddEvent("validation_completed")
+		span.SetAttributes(attribute.String("email", req.Email))
 
+		span.AddEvent("started_user_login")
 		singInResponse, err := authService.LoginUser(r.Context(), req.Email, req.Password)
 		if err != nil {
 			st, ok := status.FromError(err)
@@ -204,6 +224,8 @@ func SignIn(log *slog.Logger, authService AuthService) http.HandlerFunc {
 			render.JSON(w, r, response.Error("failed to login user"))
 			return
 		}
+		span.AddEvent("completed_user_login")
+		span.SetAttributes(attribute.String("channel", req.Email))
 
 		log.Info("user logged in successfully")
 

@@ -8,6 +8,7 @@ import (
 	lpgrpc "github.com/DimTur/lp_api_gateway/internal/clients/lp/grpc"
 	ssogrpc "github.com/DimTur/lp_api_gateway/internal/clients/sso/grpc"
 	"github.com/DimTur/lp_api_gateway/internal/handlers"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type App struct {
@@ -22,8 +23,14 @@ func NewApp(
 	authGRPCClient ssogrpc.Client,
 	lpGRPCClient lpgrpc.Client,
 	logger *slog.Logger,
+	traceProvider trace.TracerProvider,
 ) (*App, error) {
-	routerConfigurator := handlers.NewChiRouterConfigurator(authGRPCClient, lpGRPCClient, logger)
+	routerConfigurator := handlers.NewChiRouterConfigurator(
+		authGRPCClient,
+		lpGRPCClient,
+		logger,
+		traceProvider,
+	)
 	router := routerConfigurator.ConfigureRouter()
 
 	httpServer, err := httpapp.NewHTTPServer(

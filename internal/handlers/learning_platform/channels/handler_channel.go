@@ -13,6 +13,8 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator/v10"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -84,6 +86,10 @@ func CreateChannel(log *slog.Logger, lpService LPService) http.HandlerFunc {
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
+		tracer := otel.Tracer("LPTracer")
+		_, span := tracer.Start(r.Context(), "CreateChannel")
+		defer span.End()
+
 		var req CreateChannelRequest
 
 		userIDStr := r.Header.Get("X-User-ID")
@@ -93,12 +99,15 @@ func CreateChannel(log *slog.Logger, lpService LPService) http.HandlerFunc {
 			return
 		}
 
+		span.AddEvent("transform_header_started")
 		userID, err := strconv.ParseInt(userIDStr, 10, 64)
 		if err != nil {
 			log.Error("invalid X-User-ID in headers", slog.String("err", err.Error()))
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
+		span.AddEvent("transform_completed")
+		span.SetAttributes(attribute.Int64("X-User-ID", userID))
 
 		err = render.DecodeJSON(r.Body, &req)
 		if err != nil {
@@ -110,6 +119,7 @@ func CreateChannel(log *slog.Logger, lpService LPService) http.HandlerFunc {
 
 		log.Info("request body decoded", slog.Any("request", req))
 
+		span.AddEvent("validation_started")
 		if err := Validate.Struct(req); err != nil {
 			validateErr := err.(validator.ValidationErrors)
 
@@ -118,7 +128,10 @@ func CreateChannel(log *slog.Logger, lpService LPService) http.HandlerFunc {
 			render.JSON(w, r, response.ValidationError(validateErr))
 			return
 		}
+		span.AddEvent("validation_completed")
+		span.SetAttributes(attribute.String("channel", req.Name))
 
+		span.AddEvent("channel_create_started")
 		respID, err := lpService.CreateChannel(
 			r.Context(),
 			req.Name,
@@ -141,6 +154,8 @@ func CreateChannel(log *slog.Logger, lpService LPService) http.HandlerFunc {
 			render.JSON(w, r, response.Error("failed to create channel"))
 			return
 		}
+		span.AddEvent("channel_create_completed")
+		span.SetAttributes(attribute.String("channel", req.Name))
 
 		log.Info("channel created", slog.Int64("id", respID.Channel.ChannelId))
 
@@ -174,6 +189,10 @@ func GetChannel(log *slog.Logger, lpService LPService) http.HandlerFunc {
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
+		tracer := otel.Tracer("LPTracer")
+		_, span := tracer.Start(r.Context(), "GetChannel")
+		defer span.End()
+
 		channelIDStr := chi.URLParam(r, "id")
 		if channelIDStr == "" {
 			log.Error("missing channel ID in query params")
@@ -181,13 +200,17 @@ func GetChannel(log *slog.Logger, lpService LPService) http.HandlerFunc {
 			return
 		}
 
+		span.AddEvent("transform_url_param_started")
 		channelID, err := strconv.ParseInt(channelIDStr, 10, 64)
 		if err != nil {
 			log.Error("invalid channel ID in query params", slog.String("err", err.Error()))
 			http.Error(w, "Bad Request", http.StatusBadRequest)
 			return
 		}
+		span.AddEvent("transform_completed")
+		span.SetAttributes(attribute.Int64("channelID", channelID))
 
+		span.AddEvent("getting_channel_started")
 		channel, err := lpService.GetChannel(r.Context(), channelID)
 		if err != nil {
 			if st, ok := status.FromError(err); ok {
@@ -204,6 +227,8 @@ func GetChannel(log *slog.Logger, lpService LPService) http.HandlerFunc {
 			render.JSON(w, r, response.Error("Internal Server Error"))
 			return
 		}
+		span.AddEvent("getting_channel_completed")
+		span.SetAttributes(attribute.Int64("channelID", channelID))
 
 		log.Info("channel retrieved", slog.Int64("channel_id", channelID))
 

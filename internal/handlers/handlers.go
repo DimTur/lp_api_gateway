@@ -15,6 +15,7 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/go-chi/httprate"
 	httpSwagger "github.com/swaggo/http-swagger"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type RouterConfigurator interface {
@@ -25,13 +26,20 @@ type ChiRouterConfigurator struct {
 	AuthGRPCClient ssogrpc.Client
 	LPGRPCClient   lpgrpc.Client
 	Logger         *slog.Logger
+	TracerProvider trace.TracerProvider
 }
 
-func NewChiRouterConfigurator(authGRPCClient ssogrpc.Client, lpGRPCClient lpgrpc.Client, logger *slog.Logger) *ChiRouterConfigurator {
+func NewChiRouterConfigurator(
+	authGRPCClient ssogrpc.Client,
+	lpGRPCClient lpgrpc.Client,
+	logger *slog.Logger,
+	tracerProvider trace.TracerProvider,
+) *ChiRouterConfigurator {
 	return &ChiRouterConfigurator{
 		AuthGRPCClient: authGRPCClient,
 		LPGRPCClient:   lpGRPCClient,
 		Logger:         logger,
+		TracerProvider: tracerProvider,
 	}
 }
 
