@@ -55,12 +55,12 @@ func NewServeCmd() *cobra.Command {
 				return err
 			}
 
-			traceService, err := tracer.InitTracer("localhost:4318", "LP Service")
+			traceService, err := tracer.InitTracer(cfg.Tracer.OpenTelemetry.Address, cfg.Tracer.OpenTelemetry.ServiceName)
 			if err != nil {
 				return err
 			}
 
-			meterService, err := meter.InitMeter(ctx, "LP Service")
+			meterService, err := meter.InitMeter(ctx, cfg.Meter.Prometheus.Address)
 			if err != nil {
 				return err
 			}

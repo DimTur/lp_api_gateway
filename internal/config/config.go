@@ -9,7 +9,8 @@ import (
 type Config struct {
 	HTTPServer HTTPServer    `yaml:"http_server"`
 	Clients    ClientsConfig `yaml:"clients"`
-	// AppSecret  string        `yaml:"app_secret" env-required:"true" env:"APP_SECRET"`
+	Tracer     OpenTelemetry `yaml:"tracer"`
+	Meter      Prometheus    `yaml:"meter"`
 }
 
 type HTTPServer struct {
@@ -25,9 +26,26 @@ type Client struct {
 	Insecure     bool          `yaml:"insecure"`
 }
 
+type Tracer struct {
+	Address     string `yaml:"address"`
+	ServiceName string `yaml:"service_name"`
+}
+
+type Meter struct {
+	Address string `yaml:"address"`
+}
+
 type ClientsConfig struct {
 	SSO Client `yaml:"sso"`
 	LP  Client `yaml:"lp"`
+}
+
+type OpenTelemetry struct {
+	OpenTelemetry Tracer `yaml:"opentelemetry"`
+}
+
+type Prometheus struct {
+	Prometheus Meter `yaml:"prometheus"`
 }
 
 func Parse(s string) (*Config, error) {

@@ -13,3 +13,10 @@ clients:
     timeout: "2s"
     retries_count: 3
     insecure: false
+tracer:
+  opentelemetry:
+    address: "localhost:4318"
+    service_name: "api_gateway"
+meter:
+  prometheus:
+    service_name: "api_gateway"
