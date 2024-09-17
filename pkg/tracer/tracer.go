@@ -13,6 +13,11 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 )
 
+var (
+	AuthTracer = otel.Tracer("auth-tracer")
+	LPtracer   = otel.Tracer("lp-tracer")
+)
+
 // NewExporter creates a new OTLP trace exporter
 func NewExporter(endpoint string) (tracesdk.SpanExporter, error) {
 	// headers := map[string]string{

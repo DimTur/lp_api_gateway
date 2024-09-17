@@ -10,7 +10,8 @@ import (
 	lpgrpc "github.com/DimTur/lp_api_gateway/internal/clients/lp/grpc"
 	ssogrpc "github.com/DimTur/lp_api_gateway/internal/clients/sso/grpc"
 	"github.com/DimTur/lp_api_gateway/internal/config"
-	"github.com/DimTur/lp_api_gateway/internal/tracer"
+	"github.com/DimTur/lp_api_gateway/pkg/meter"
+	"github.com/DimTur/lp_api_gateway/pkg/tracer"
 	"github.com/spf13/cobra"
 )
 
@@ -59,6 +60,11 @@ func NewServeCmd() *cobra.Command {
 				return err
 			}
 
+			meterService, err := meter.InitMeter(ctx, "LP Service")
+			if err != nil {
+				return err
+			}
+
 			application, err := app.NewApp(
 				cfg.HTTPServer.Address,
 				cfg.HTTPServer.Timeout,
@@ -68,6 +74,7 @@ func NewServeCmd() *cobra.Command {
 				*lpClient,
 				log,
 				traceService,
+				meterService,
 			)
 			if err != nil {
 				return err

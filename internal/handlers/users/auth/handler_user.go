@@ -8,11 +8,12 @@ import (
 
 	"github.com/DimTur/lp_api_gateway/internal/lib/api/response"
 	"github.com/DimTur/lp_api_gateway/internal/lib/api/validation"
+	"github.com/DimTur/lp_api_gateway/pkg/meter"
+	"github.com/DimTur/lp_api_gateway/pkg/tracer"
 	ssov1 "github.com/DimTur/lp_protos/gen/go/sso"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator/v10"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -79,8 +80,10 @@ func SingUp(log *slog.Logger, authService AuthService) http.HandlerFunc {
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
-		tracer := otel.Tracer("AuthTracer")
-		_, span := tracer.Start(r.Context(), "SingUp")
+		meter.AllReqCount.Add(r.Context(), 1)
+		meter.SignUpReqCount.Add(r.Context(), 1)
+
+		_, span := tracer.AuthTracer.Start(r.Context(), "SingUp")
 		defer span.End()
 
 		var req SingUpRequest
@@ -157,8 +160,10 @@ func SignIn(log *slog.Logger, authService AuthService) http.HandlerFunc {
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
-		tracer := otel.Tracer("AuthTracer")
-		_, span := tracer.Start(r.Context(), "SignIn")
+		meter.AllReqCount.Add(r.Context(), 1)
+		meter.SignInReqCount.Add(r.Context(), 1)
+
+		_, span := tracer.AuthTracer.Start(r.Context(), "SignIn")
 		defer span.End()
 
 		var req SingInRequest

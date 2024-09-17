@@ -14,7 +14,9 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/httprate"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	httpSwagger "github.com/swaggo/http-swagger"
+	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -27,6 +29,7 @@ type ChiRouterConfigurator struct {
 	LPGRPCClient   lpgrpc.Client
 	Logger         *slog.Logger
 	TracerProvider trace.TracerProvider
+	MeterProvider  metric.MeterProvider
 }
 
 func NewChiRouterConfigurator(
@@ -34,12 +37,14 @@ func NewChiRouterConfigurator(
 	lpGRPCClient lpgrpc.Client,
 	logger *slog.Logger,
 	tracerProvider trace.TracerProvider,
+	meterProvider metric.MeterProvider,
 ) *ChiRouterConfigurator {
 	return &ChiRouterConfigurator{
 		AuthGRPCClient: authGRPCClient,
 		LPGRPCClient:   lpGRPCClient,
 		Logger:         logger,
 		TracerProvider: tracerProvider,
+		MeterProvider:  meterProvider,
 	}
 }
 
@@ -68,6 +73,9 @@ func (c *ChiRouterConfigurator) ConfigureRouter() http.Handler {
 
 	// Swagger
 	router.Get("/swagger/*", httpSwagger.WrapHandler)
+
+	// Trace and metrics
+	router.Handle("/metrics", promhttp.Handler())
 
 	// Auth
 	router.Post("/sing_up", authhandler.SingUp(c.Logger, &c.AuthGRPCClient))

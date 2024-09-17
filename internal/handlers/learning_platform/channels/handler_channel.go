@@ -8,12 +8,13 @@ import (
 	"strconv"
 
 	"github.com/DimTur/lp_api_gateway/internal/lib/api/response"
+	"github.com/DimTur/lp_api_gateway/pkg/meter"
+	"github.com/DimTur/lp_api_gateway/pkg/tracer"
 	lpv1 "github.com/DimTur/lp_protos/gen/go/lp"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator/v10"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -86,8 +87,10 @@ func CreateChannel(log *slog.Logger, lpService LPService) http.HandlerFunc {
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
-		tracer := otel.Tracer("LPTracer")
-		_, span := tracer.Start(r.Context(), "CreateChannel")
+		meter.AllReqCount.Add(r.Context(), 1)
+		meter.CreateChannelReqCount.Add(r.Context(), 1)
+
+		_, span := tracer.LPtracer.Start(r.Context(), "CreateChannel")
 		defer span.End()
 
 		var req CreateChannelRequest
@@ -189,8 +192,10 @@ func GetChannel(log *slog.Logger, lpService LPService) http.HandlerFunc {
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
-		tracer := otel.Tracer("LPTracer")
-		_, span := tracer.Start(r.Context(), "GetChannel")
+		meter.AllReqCount.Add(r.Context(), 1)
+		meter.GetChannelReqCount.Add(r.Context(), 1)
+
+		_, span := tracer.LPtracer.Start(r.Context(), "GetChannel")
 		defer span.End()
 
 		channelIDStr := chi.URLParam(r, "id")
