@@ -145,7 +145,7 @@ func CreateChannel(log *slog.Logger, lpService LPService) http.HandlerFunc {
 		if err != nil {
 			if st, ok := status.FromError(err); ok {
 				if st.Code() == codes.InvalidArgument {
-					log.Error("invalid credentials", slog.Any("channel", req))
+					log.Error("invalid credentials", slog.Any("channel", req.Name))
 					w.WriteHeader(http.StatusBadRequest)
 					render.JSON(w, r, response.Error("invalid credentials"))
 					return

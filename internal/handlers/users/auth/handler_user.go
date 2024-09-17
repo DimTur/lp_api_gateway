@@ -96,7 +96,7 @@ func SingUp(log *slog.Logger, authService AuthService) http.HandlerFunc {
 			return
 		}
 
-		log.Info("request body decoded", slog.Any("request", req))
+		log.Info("request body decoded", slog.Any("request from", req.Email))
 
 		span.AddEvent("validation_started")
 		if err := Validate.Struct(req); err != nil {
@@ -115,7 +115,7 @@ func SingUp(log *slog.Logger, authService AuthService) http.HandlerFunc {
 		if err != nil {
 			if st, ok := status.FromError(err); ok {
 				if st.Code() == codes.AlreadyExists {
-					log.Error("user already exists", slog.Any("channel", req))
+					log.Error("user already exists", slog.Any("email", req.Email))
 					w.WriteHeader(http.StatusBadRequest)
 					render.JSON(w, r, response.Error("user already exists"))
 					return
@@ -128,7 +128,7 @@ func SingUp(log *slog.Logger, authService AuthService) http.HandlerFunc {
 			return
 		}
 		span.AddEvent("completed_user_registering")
-		span.SetAttributes(attribute.String("channel", req.Email))
+		span.SetAttributes(attribute.String("email", req.Email))
 
 		log.Info("user registered", slog.Int64("id", respID.UserId))
 
@@ -176,7 +176,7 @@ func SignIn(log *slog.Logger, authService AuthService) http.HandlerFunc {
 			return
 		}
 
-		log.Info("request body decoded", slog.Any("request", req))
+		log.Info("request body decoded", slog.Any("request from", req.Email))
 
 		span.AddEvent("validation_started")
 		if err := Validate.Struct(req); err != nil {
@@ -230,7 +230,7 @@ func SignIn(log *slog.Logger, authService AuthService) http.HandlerFunc {
 			return
 		}
 		span.AddEvent("completed_user_login")
-		span.SetAttributes(attribute.String("channel", req.Email))
+		span.SetAttributes(attribute.String("email", req.Email))
 
 		log.Info("user logged in successfully")
 
