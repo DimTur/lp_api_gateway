@@ -1,15 +1,5 @@
 basePath: /
 definitions:
-  authhandler.SingInRequest:
-    properties:
-      email:
-        type: string
-      password:
-        type: string
-    required:
-    - email
-    - password
-    type: object
   authhandler.SingInResponse:
     properties:
       access_token:
@@ -21,41 +11,14 @@ definitions:
       status:
         type: string
     type: object
-  authhandler.SingUpRequest:
-    properties:
-      email:
-        type: string
-      password:
-        type: string
-    required:
-    - email
-    - password
-    type: object
   authhandler.SingUpResponse:
     properties:
       error:
         type: string
       status:
         type: string
-      user_id:
-        type: integer
-    type: object
-  channelshandler.CreateChannelRequest:
-    properties:
-      description:
-        minLength: 10
-        type: string
-      name:
-        maxLength: 50
-        minLength: 3
-        type: string
-      public:
-        description: UserID      int64  `json:"user_id" validate:"required,numeric"`
+      success:
         type: boolean
-    required:
-    - description
-    - name
-    - public
     type: object
   channelshandler.CreateChannelResponce:
     properties:
@@ -68,26 +31,66 @@ definitions:
     type: object
   channelshandler.GetChannelResponce:
     properties:
-      created_by:
-        type: integer
-      description:
-        type: string
+      channel:
+        $ref: '#/definitions/lpmodels.GetChannelResponse'
       error:
         type: string
-      last_modified_by:
+      status:
+        type: string
+    type: object
+  lpmodels.CreateChannel:
+    properties:
+      created_by:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+    required:
+    - created_by
+    - name
+    type: object
+  lpmodels.GetChannelResponse:
+    properties:
+      createdAt:
+        type: string
+      createdBy:
+        type: string
+      description:
+        type: string
+      id:
         type: integer
+      lastModifiedBy:
+        type: string
+      modified:
+        type: string
+      name:
+        type: string
+      plans:
+        items:
+          $ref: '#/definitions/lpmodels.Plan'
+        type: array
+    type: object
+  lpmodels.Plan:
+    properties:
+      createdAt:
+        type: string
+      createdBy:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      isPublished:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      modified:
+        type: string
       name:
         type: string
       public:
         type: boolean
-      status:
-        type: string
-    required:
-    - created_by
-    - description
-    - last_modified_by
-    - name
-    - public
     type: object
   response.Response:
     properties:
@@ -95,6 +98,28 @@ definitions:
         type: string
       status:
         type: string
+    type: object
+  ssomodels.LogIn:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  ssomodels.RegisterUser:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
     type: object
 host: localhost:8000
 info:
@@ -113,10 +138,10 @@ paths:
       parameters:
       - description: Channel creation parameters
         in: body
-        name: CreateChannelRequest
+        name: lpmodels.CreateChannel
         required: true
         schema:
-          $ref: '#/definitions/channelshandler.CreateChannelRequest'
+          $ref: '#/definitions/lpmodels.CreateChannel'
       produces:
       - application/json
       responses:
@@ -147,7 +172,7 @@ paths:
       - application/json
       description: This endpoint returns channel information by ID.
       parameters:
-      - description: ID канала
+      - description: ID of the channel
         in: path
         name: id
         required: true
@@ -184,10 +209,10 @@ paths:
       parameters:
       - description: Sign-in parameters
         in: body
-        name: SingInRequest
+        name: ssomodels.LogIn
         required: true
         schema:
-          $ref: '#/definitions/authhandler.SingInRequest'
+          $ref: '#/definitions/ssomodels.LogIn'
       produces:
       - application/json
       responses:
@@ -218,10 +243,10 @@ paths:
       parameters:
       - description: Registration parameters
         in: body
-        name: SingUpRequest
+        name: ssomodels.RegisterUser
         required: true
         schema:
-          $ref: '#/definitions/authhandler.SingUpRequest'
+          $ref: '#/definitions/ssomodels.RegisterUser'
       produces:
       - application/json
       responses:

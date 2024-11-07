@@ -5,6 +5,8 @@ import (
 	"log/slog"
 	"net/http"
 	"time"
+
+	"github.com/go-playground/validator/v10"
 )
 
 const (
@@ -16,6 +18,7 @@ type APIServer struct {
 	httpSrv             *http.Server
 	gracefulStopTimeout time.Duration
 	logger              *slog.Logger
+	validator           *validator.Validate
 }
 
 func NewHTTPServer(
@@ -25,6 +28,7 @@ func NewHTTPServer(
 	writeTimeout time.Duration,
 	iddleTimeout time.Duration,
 	logger *slog.Logger,
+	validator *validator.Validate,
 ) (*APIServer, error) {
 	const op = "http-server"
 
@@ -47,6 +51,7 @@ func NewHTTPServer(
 		httpSrv:             httpSrv,
 		gracefulStopTimeout: HTTPDefaultGracefulStopTimeout,
 		logger:              logger,
+		validator:           validator,
 	}, nil
 }
 

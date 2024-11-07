@@ -14,6 +14,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/httprate"
+	"github.com/go-playground/validator/v10"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"go.opentelemetry.io/otel/metric"
@@ -28,6 +29,7 @@ type ChiRouterConfigurator struct {
 	AuthGRPCClient ssogrpc.Client
 	LPGRPCClient   lpgrpc.Client
 	Logger         *slog.Logger
+	validator      *validator.Validate
 	TracerProvider trace.TracerProvider
 	MeterProvider  metric.MeterProvider
 }
@@ -36,6 +38,7 @@ func NewChiRouterConfigurator(
 	authGRPCClient ssogrpc.Client,
 	lpGRPCClient lpgrpc.Client,
 	logger *slog.Logger,
+	validator *validator.Validate,
 	tracerProvider trace.TracerProvider,
 	meterProvider metric.MeterProvider,
 ) *ChiRouterConfigurator {
@@ -43,6 +46,7 @@ func NewChiRouterConfigurator(
 		AuthGRPCClient: authGRPCClient,
 		LPGRPCClient:   lpGRPCClient,
 		Logger:         logger,
+		validator:      validator,
 		TracerProvider: tracerProvider,
 		MeterProvider:  meterProvider,
 	}
@@ -78,14 +82,14 @@ func (c *ChiRouterConfigurator) ConfigureRouter() http.Handler {
 	router.Handle("/metrics", promhttp.Handler())
 
 	// Auth
-	router.Post("/sing_up", authhandler.SingUp(c.Logger, &c.AuthGRPCClient))
-	router.Post("/sing_in", authhandler.SignIn(c.Logger, &c.AuthGRPCClient))
+	router.Post("/sing_up", authhandler.SingUp(c.Logger, c.validator, &c.AuthGRPCClient))
+	router.Post("/sing_in", authhandler.SignIn(c.Logger, c.validator, &c.AuthGRPCClient))
 
 	// Learning Platform
 	router.Group(func(r chi.Router) {
-		r.Use(authmiddleware.AuthMiddleware(c.Logger, &c.AuthGRPCClient))
-		r.Post("/create_channel", channelshandler.CreateChannel(c.Logger, &c.LPGRPCClient))
-		r.Get("/get_channel/{id}", channelshandler.GetChannel(c.Logger, &c.LPGRPCClient))
+		r.Use(authmiddleware.AuthMiddleware(c.Logger, c.validator, &c.AuthGRPCClient))
+		r.Post("/create_channel", channelshandler.CreateChannel(c.Logger, c.validator, &c.LPGRPCClient))
+		r.Get("/get_channel/{id}", channelshandler.GetChannel(c.Logger, c.validator, &c.LPGRPCClient))
 	})
 
 	return router

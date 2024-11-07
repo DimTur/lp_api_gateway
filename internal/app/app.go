@@ -8,6 +8,7 @@ import (
 	lpgrpc "github.com/DimTur/lp_api_gateway/internal/clients/lp/grpc"
 	ssogrpc "github.com/DimTur/lp_api_gateway/internal/clients/sso/grpc"
 	"github.com/DimTur/lp_api_gateway/internal/handlers"
+	"github.com/go-playground/validator/v10"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -24,6 +25,7 @@ func NewApp(
 	authGRPCClient ssogrpc.Client,
 	lpGRPCClient lpgrpc.Client,
 	logger *slog.Logger,
+	validator *validator.Validate,
 	traceProvider trace.TracerProvider,
 	meterProvider metric.MeterProvider,
 ) (*App, error) {
@@ -31,6 +33,7 @@ func NewApp(
 		authGRPCClient,
 		lpGRPCClient,
 		logger,
+		validator,
 		traceProvider,
 		meterProvider,
 	)
@@ -43,6 +46,7 @@ func NewApp(
 		writeTimeout,
 		iddleTimeout,
 		logger,
+		validator,
 	)
 	if err != nil {
 		logger.Error("failed to create server", slog.Any("err", err))

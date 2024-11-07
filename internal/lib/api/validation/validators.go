@@ -14,6 +14,12 @@ var (
 	}
 )
 
+func InitValidator() *validator.Validate {
+	validate := validator.New()
+	RegisterValidations(validate)
+	return validate
+}
+
 func PasswordValidator(fl validator.FieldLevel) bool {
 	password := fl.Field().String()
 
@@ -29,4 +35,8 @@ func PasswordValidator(fl validator.FieldLevel) bool {
 		return false
 	}
 	return true
+}
+
+func RegisterValidations(v *validator.Validate) {
+	v.RegisterValidation("password_complexity", PasswordValidator)
 }

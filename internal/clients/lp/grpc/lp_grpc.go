@@ -57,45 +57,6 @@ func New(
 	}, nil
 }
 
-func (c *Client) CreateChannel(ctx context.Context,
-	name string,
-	description string,
-	userID int64,
-	public bool) (*lpv1.CreateChannelResponse, error) {
-	const op = "lp.grpc.CreateChannel"
-
-	channel := &lpv1.Channel{
-		Name:        name,
-		Description: description,
-		CreatedBy:   userID,
-		Public:      public,
-	}
-
-	resp, err := c.api.CreateChannel(ctx, &lpv1.CreateChannelRequest{
-		Channel: channel,
-	})
-	if err != nil {
-		c.log.Error("received error from auth grpc service", slog.String("err", err.Error()))
-		return nil, fmt.Errorf("%s: %w", op, err)
-	}
-
-	return resp, nil
-}
-
-func (c *Client) GetChannel(ctx context.Context, channelID int64) (*lpv1.GetChannelResponse, error) {
-	const op = "lp.grpc.GetChannel"
-
-	resp, err := c.api.GetChannel(ctx, &lpv1.GetChannelRequest{
-		ChannelId: channelID,
-	})
-	if err != nil {
-		c.log.Error("received error from auth grpc service", slog.String("err", err.Error()))
-		return nil, fmt.Errorf("%s: %w", op, err)
-	}
-
-	return resp, nil
-}
-
 // InterceptorLogger adapts slog logger to iterceptor logger.
 // This code is simple enough to be copied and not imported.
 func InterceptorLogger(l *slog.Logger) grpclog.Logger {

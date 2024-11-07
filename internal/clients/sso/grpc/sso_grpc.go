@@ -15,7 +15,7 @@ import (
 )
 
 type Client struct {
-	api ssov1.AuthClient
+	api ssov1.SsoClient
 	log *slog.Logger
 }
 
@@ -52,52 +52,9 @@ func New(
 	}
 
 	return &Client{
-		api: ssov1.NewAuthClient(cc),
+		api: ssov1.NewSsoClient(cc),
 		log: log,
 	}, nil
-}
-
-func (c *Client) RegisterUser(ctx context.Context, email string, password string) (*ssov1.RegisterUserResponse, error) {
-	const op = "sso.grpc.RegisterUser"
-
-	resp, err := c.api.RegisterUser(ctx, &ssov1.RegisterUserRequest{
-		Email:    email,
-		Password: password,
-	})
-	if err != nil {
-		c.log.Error("received error from auth grpc service", slog.String("err", err.Error()))
-		return nil, fmt.Errorf("%s: %w", op, err)
-	}
-
-	return resp, nil
-}
-
-func (c *Client) LoginUser(ctx context.Context, email string, password string) (*ssov1.LoginUserResponse, error) {
-	const op = "sso.grpc.LoginUser"
-
-	resp, err := c.api.LoginUser(ctx, &ssov1.LoginUserRequest{
-		Email:    email,
-		Password: password,
-	})
-	if err != nil {
-		c.log.Error("received error from auth grpc service", slog.String("err", err.Error()))
-		return nil, fmt.Errorf("%s: %w", op, err)
-	}
-
-	return resp, nil
-}
-
-func (c *Client) AuthCheck(ctx context.Context, accessToken string) (*ssov1.AuthCheckResponse, error) {
-	const op = "sso.grpc.AuthCheck"
-
-	resp, err := c.api.AuthCheck(ctx, &ssov1.AuthCheckRequest{
-		AccessToken: accessToken,
-	})
-	if err != nil {
-		c.log.Error("received error from auth grpc service", slog.String("err", err.Error()))
-		return nil, fmt.Errorf("%s: %w", op, err)
-	}
-	return resp, nil
 }
 
 // InterceptorLogger adapts slog logger to iterceptor logger.

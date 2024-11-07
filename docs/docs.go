@@ -38,11 +38,11 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "Channel creation parameters",
-                        "name": "CreateChannelRequest",
+                        "name": "lpmodels.CreateChannel",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/channelshandler.CreateChannelRequest"
+                            "$ref": "#/definitions/lpmodels.CreateChannel"
                         }
                     }
                 ],
@@ -95,7 +95,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "ID канала",
+                        "description": "ID of the channel",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -145,11 +145,11 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "Sign-in parameters",
-                        "name": "SingInRequest",
+                        "name": "ssomodels.LogIn",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/authhandler.SingInRequest"
+                            "$ref": "#/definitions/ssomodels.LogIn"
                         }
                     }
                 ],
@@ -197,11 +197,11 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "Registration parameters",
-                        "name": "SingUpRequest",
+                        "name": "ssomodels.RegisterUser",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/authhandler.SingUpRequest"
+                            "$ref": "#/definitions/ssomodels.RegisterUser"
                         }
                     }
                 ],
@@ -229,21 +229,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "authhandler.SingInRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                }
-            }
-        },
         "authhandler.SingInResponse": {
             "type": "object",
             "properties": {
@@ -261,21 +246,6 @@ const docTemplate = `{
                 }
             }
         },
-        "authhandler.SingUpRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                }
-            }
-        },
         "authhandler.SingUpResponse": {
             "type": "object",
             "properties": {
@@ -285,30 +255,7 @@ const docTemplate = `{
                 "status": {
                     "type": "string"
                 },
-                "user_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "channelshandler.CreateChannelRequest": {
-            "type": "object",
-            "required": [
-                "description",
-                "name",
-                "public"
-            ],
-            "properties": {
-                "description": {
-                    "type": "string",
-                    "minLength": 10
-                },
-                "name": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "minLength": 3
-                },
-                "public": {
-                    "description": "UserID      int64  ` + "`" + `json:\"user_id\" validate:\"required,numeric\"` + "`" + `",
+                "success": {
                     "type": "boolean"
                 }
             }
@@ -329,34 +276,97 @@ const docTemplate = `{
         },
         "channelshandler.GetChannelResponce": {
             "type": "object",
-            "required": [
-                "created_by",
-                "description",
-                "last_modified_by",
-                "name",
-                "public"
-            ],
             "properties": {
-                "created_by": {
-                    "type": "integer"
-                },
-                "description": {
-                    "type": "string"
+                "channel": {
+                    "$ref": "#/definitions/lpmodels.GetChannelResponse"
                 },
                 "error": {
                     "type": "string"
                 },
-                "last_modified_by": {
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "lpmodels.CreateChannel": {
+            "type": "object",
+            "required": [
+                "created_by",
+                "name"
+            ],
+            "properties": {
+                "created_by": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "lpmodels.GetChannelResponse": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "createdBy": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
                     "type": "integer"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "modified": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "plans": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/lpmodels.Plan"
+                    }
+                }
+            }
+        },
+        "lpmodels.Plan": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "createdBy": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isPublished": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "modified": {
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
                 "public": {
                     "type": "boolean"
-                },
-                "status": {
-                    "type": "string"
                 }
             }
         },
@@ -367,6 +377,39 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "ssomodels.LogIn": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "ssomodels.RegisterUser": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
                     "type": "string"
                 }
             }
