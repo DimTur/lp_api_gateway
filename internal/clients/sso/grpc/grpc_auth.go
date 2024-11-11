@@ -80,11 +80,11 @@ func (c *Client) LoginUser(ctx context.Context, logUser *ssomodels.LogIn) (*ssom
 	}, nil
 }
 
-func (c *Client) LogInViaTg(ctx context.Context, email string) (*ssomodels.LogInViaTgResp, error) {
+func (c *Client) LogInViaTg(ctx context.Context, email *ssomodels.LogInViaTg) (*ssomodels.LogInViaTgResp, error) {
 	const op = "sso.grpc_auth.LogInViaTg"
 
 	resp, err := c.api.LoginViaTg(ctx, &ssov1.LoginViaTgRequest{
-		Email: email,
+		Email: email.Email,
 	})
 	if err != nil {
 		switch status.Code(err) {
@@ -93,7 +93,7 @@ func (c *Client) LogInViaTg(ctx context.Context, email string) (*ssomodels.LogIn
 			return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 		case codes.NotFound:
 			c.log.Error("user not found", slog.String("err", err.Error()))
-			return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+			return nil, fmt.Errorf("%s: %w", op, ErrUserNotFound)
 		default:
 			c.log.Error("internal error", slog.String("err", err.Error()))
 			return nil, fmt.Errorf("%s: %w", op, ErrInternal)
@@ -203,11 +203,11 @@ func (c *Client) IsAdmin(ctx context.Context, userID *ssomodels.IsAdmin) (*ssomo
 	}, nil
 }
 
-func (c *Client) AuthCheck(ctx context.Context, authChek *ssomodels.AuthCheck) (*ssomodels.AuthCheckResp, error) {
+func (c *Client) AuthCheck(ctx context.Context, authCheck *ssomodels.AuthCheck) (*ssomodels.AuthCheckResp, error) {
 	const op = "sso.grpc_auth.AuthCheck"
 
 	resp, err := c.api.AuthCheck(ctx, &ssov1.AuthCheckRequest{
-		AccessToken: authChek.AccessToken,
+		AccessToken: authCheck.AccessToken,
 	})
 	if err != nil {
 		switch status.Code(err) {

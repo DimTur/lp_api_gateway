@@ -6,10 +6,11 @@ import (
 	"time"
 
 	lpgrpc "github.com/DimTur/lp_api_gateway/internal/clients/lp/grpc"
-	ssogrpc "github.com/DimTur/lp_api_gateway/internal/clients/sso/grpc"
 	channelshandler "github.com/DimTur/lp_api_gateway/internal/handlers/learning_platform/channels"
 	authmiddleware "github.com/DimTur/lp_api_gateway/internal/handlers/middleware/auth"
-	authhandler "github.com/DimTur/lp_api_gateway/internal/handlers/users/auth"
+	authhandler "github.com/DimTur/lp_api_gateway/internal/handlers/sso/auth"
+	learninggrouphandler "github.com/DimTur/lp_api_gateway/internal/handlers/sso/learning_group"
+	ssoservice "github.com/DimTur/lp_api_gateway/internal/services/sso"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
@@ -26,7 +27,7 @@ type RouterConfigurator interface {
 }
 
 type ChiRouterConfigurator struct {
-	AuthGRPCClient ssogrpc.Client
+	SsoService     ssoservice.SsoService
 	LPGRPCClient   lpgrpc.Client
 	Logger         *slog.Logger
 	validator      *validator.Validate
@@ -35,7 +36,7 @@ type ChiRouterConfigurator struct {
 }
 
 func NewChiRouterConfigurator(
-	authGRPCClient ssogrpc.Client,
+	ssoService ssoservice.SsoService,
 	lpGRPCClient lpgrpc.Client,
 	logger *slog.Logger,
 	validator *validator.Validate,
@@ -43,7 +44,7 @@ func NewChiRouterConfigurator(
 	meterProvider metric.MeterProvider,
 ) *ChiRouterConfigurator {
 	return &ChiRouterConfigurator{
-		AuthGRPCClient: authGRPCClient,
+		SsoService:     ssoService,
 		LPGRPCClient:   lpGRPCClient,
 		Logger:         logger,
 		validator:      validator,
@@ -64,7 +65,7 @@ func (c *ChiRouterConfigurator) ConfigureRouter() http.Handler {
 	router.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token", "X-User-ID"},
 		ExposedHeaders:   []string{"Link"},
 		AllowCredentials: false,
 		MaxAge:           300,
@@ -82,12 +83,28 @@ func (c *ChiRouterConfigurator) ConfigureRouter() http.Handler {
 	router.Handle("/metrics", promhttp.Handler())
 
 	// Auth
-	router.Post("/sing_up", authhandler.SingUp(c.Logger, c.validator, &c.AuthGRPCClient))
-	router.Post("/sing_in", authhandler.SignIn(c.Logger, c.validator, &c.AuthGRPCClient))
+	router.Post("/sing_up", authhandler.SingUp(c.Logger, c.validator, &c.SsoService))
+	router.Post("/sing_in", authhandler.SignIn(c.Logger, c.validator, &c.SsoService))
+	router.Post("/sing_in_by_tg", authhandler.SignInByTelegram(c.Logger, c.validator, &c.SsoService))
+	router.Post("/check_otp", authhandler.CheckOTPAndLogIn(c.Logger, c.validator, &c.SsoService))
+	router.Group(func(r chi.Router) {
+		r.Use(authmiddleware.AuthMiddleware(c.Logger, c.validator, &c.SsoService))
+		r.Patch("/profile/update_info", authhandler.UpdateUserInfo(c.Logger, c.validator, &c.SsoService))
+	})
+
+	// Lerning Groups
+	router.Group(func(r chi.Router) {
+		r.Use(authmiddleware.AuthMiddleware(c.Logger, c.validator, &c.SsoService))
+		r.Post("/learning_groups", learninggrouphandler.CreateLearningGroup(c.Logger, c.validator, &c.SsoService))
+		r.Get("/learning_group/{id}", learninggrouphandler.GetLearningGroupByID(c.Logger, c.validator, &c.SsoService))
+		r.Patch("/learning_group/{id}", learninggrouphandler.UpdateLearningGroup(c.Logger, c.validator, &c.SsoService))
+		r.Delete("/learning_group/{id}", learninggrouphandler.DeleteLearningGroup(c.Logger, c.validator, &c.SsoService))
+		r.Get("/learning_groups", learninggrouphandler.GetLearningGroups(c.Logger, c.validator, &c.SsoService))
+	})
 
 	// Learning Platform
 	router.Group(func(r chi.Router) {
-		r.Use(authmiddleware.AuthMiddleware(c.Logger, c.validator, &c.AuthGRPCClient))
+		r.Use(authmiddleware.AuthMiddleware(c.Logger, c.validator, &c.SsoService))
 		r.Post("/create_channel", channelshandler.CreateChannel(c.Logger, c.validator, &c.LPGRPCClient))
 		r.Get("/get_channel/{id}", channelshandler.GetChannel(c.Logger, c.validator, &c.LPGRPCClient))
 	})

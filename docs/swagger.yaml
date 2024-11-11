@@ -1,17 +1,59 @@
 basePath: /
 definitions:
-  authhandler.SingInResponse:
+  authhandler.CheckOTPAndLogInResponse:
     properties:
-      access_token:
+      accsessToken:
         type: string
       error:
         type: string
-      refresh_token:
+      refreshToken:
+        type: string
+      status:
+        type: string
+    type: object
+  authhandler.SingInByTgResponse:
+    properties:
+      error:
+        type: string
+      info:
+        type: string
+      status:
+        type: string
+      success:
+        type: boolean
+    type: object
+  authhandler.SingInResponse:
+    properties:
+      accsessToken:
+        type: string
+      error:
+        type: string
+      refreshToken:
         type: string
       status:
         type: string
     type: object
   authhandler.SingUpResponse:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+      success:
+        type: boolean
+    type: object
+  authhandler.UpdateUserInfoReq:
+    properties:
+      email:
+        type: string
+      is_admin:
+        type: boolean
+      name:
+        type: string
+      tg_link:
+        type: string
+    type: object
+  authhandler.UpdateUserInfoResponse:
     properties:
       error:
         type: string
@@ -36,6 +78,73 @@ definitions:
       error:
         type: string
       status:
+        type: string
+    type: object
+  learninggrouphandler.CreateLGroupResponse:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+      success:
+        type: boolean
+    type: object
+  learninggrouphandler.CreateLearningGroupRequest:
+    properties:
+      name:
+        maxLength: 100
+        minLength: 3
+        type: string
+    required:
+    - name
+    type: object
+  learninggrouphandler.DeleteLGroupResponse:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+      success:
+        type: boolean
+    type: object
+  learninggrouphandler.GetLearningGroupsResponse:
+    properties:
+      error:
+        type: string
+      learningGroups:
+        $ref: '#/definitions/ssomodels.GetLGroupsResp'
+      status:
+        type: string
+    type: object
+  learninggrouphandler.GetLgByIDResponse:
+    properties:
+      error:
+        type: string
+      learningGroup:
+        $ref: '#/definitions/ssomodels.GetLgByIDResp'
+      status:
+        type: string
+    type: object
+  learninggrouphandler.UpdateLGroupResponse:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+      success:
+        type: boolean
+    type: object
+  learninggrouphandler.UpdateLearningGroupRequest:
+    properties:
+      group_admins:
+        items:
+          type: string
+        type: array
+      learners:
+        items:
+          type: string
+        type: array
+      name:
         type: string
     type: object
   lpmodels.CreateChannel:
@@ -99,6 +208,75 @@ definitions:
       status:
         type: string
     type: object
+  ssomodels.CheckOTPAndLogIn:
+    properties:
+      code:
+        type: string
+      email:
+        type: string
+    required:
+    - code
+    - email
+    type: object
+  ssomodels.GetLGroupsResp:
+    properties:
+      learningGroups:
+        items:
+          $ref: '#/definitions/ssomodels.LearningGroup'
+        type: array
+    type: object
+  ssomodels.GetLgByIDResp:
+    properties:
+      createdBy:
+        type: string
+      groupAdmins:
+        items:
+          $ref: '#/definitions/ssomodels.GroupAdmins'
+        type: array
+      id:
+        type: string
+      learners:
+        items:
+          $ref: '#/definitions/ssomodels.Learner'
+        type: array
+      modifiedBy:
+        type: string
+      name:
+        type: string
+    type: object
+  ssomodels.GroupAdmins:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  ssomodels.Learner:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  ssomodels.LearningGroup:
+    properties:
+      created:
+        type: string
+      createdBy:
+        type: string
+      id:
+        type: string
+      modifiedBy:
+        type: string
+      name:
+        type: string
+      updated:
+        type: string
+    type: object
   ssomodels.LogIn:
     properties:
       email:
@@ -109,6 +287,13 @@ definitions:
     - email
     - password
     type: object
+  ssomodels.LogInViaTg:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
   ssomodels.RegisterUser:
     properties:
       email:
@@ -116,6 +301,7 @@ definitions:
       name:
         type: string
       password:
+        minLength: 8
         type: string
     required:
     - email
@@ -129,6 +315,41 @@ info:
   title: Learning Platform API
   version: 0.1.0
 paths:
+  /check_otp:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint allows users to sign in using their email and sends
+        OTP code to chat.
+      parameters:
+      - description: Sign-in parameters
+        in: body
+        name: ssomodels.CheckOTPAndLogIn
+        required: true
+        schema:
+          $ref: '#/definitions/ssomodels.CheckOTPAndLogIn'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/authhandler.CheckOTPAndLogInResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: User Login by telegram bot
+      tags:
+      - auth
   /create_channel:
     post:
       consumes:
@@ -201,6 +422,208 @@ paths:
       summary: Get channel information
       tags:
       - channels
+  /learning_group/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: This endpoint allows learning group id and delete it.
+      parameters:
+      - description: ID of the channel
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/learninggrouphandler.DeleteLGroupResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete learning group by id
+      tags:
+      - learning groups
+    get:
+      consumes:
+      - application/json
+      description: This endpoint allows learning group id and returns lg info.
+      parameters:
+      - description: ID of the channel
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/learninggrouphandler.GetLgByIDResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get learning group by id
+      tags:
+      - learning groups
+    patch:
+      consumes:
+      - application/json
+      description: This endpoint allows learning group id and update it.
+      parameters:
+      - description: ID of the channel
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Getting parameters
+        in: body
+        name: learninggrouphandler.UpdateLearningGroupRequest
+        required: true
+        schema:
+          $ref: '#/definitions/learninggrouphandler.UpdateLearningGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/learninggrouphandler.UpdateLGroupResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update learning group by id
+      tags:
+      - learning groups
+  /learning_groups:
+    get:
+      consumes:
+      - application/json
+      description: This endpoint allows user id and returns all relevant learning
+        groups.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/learninggrouphandler.GetLearningGroupsResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get learning groups relevant for user
+      tags:
+      - learning groups
+    post:
+      consumes:
+      - application/json
+      description: This endpoint allows learning group info and create it.
+      parameters:
+      - description: Creating parameters
+        in: body
+        name: learninggrouphandler.CreateLearningGroupRequest
+        required: true
+        schema:
+          $ref: '#/definitions/learninggrouphandler.CreateLearningGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/learninggrouphandler.CreateLGroupResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new learning group
+      tags:
+      - learning groups
+  /profile/update_info:
+    patch:
+      consumes:
+      - application/json
+      description: This endpoint allow users to change their profile.
+      parameters:
+      - description: Sign-in parameters
+        in: body
+        name: authhandler.UpdateUserInfoReq
+        required: true
+        schema:
+          $ref: '#/definitions/authhandler.UpdateUserInfoReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/authhandler.UpdateUserInfoResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Change self user info
+      tags:
+      - auth
   /sing_in:
     post:
       consumes:
@@ -233,6 +656,41 @@ paths:
           schema:
             $ref: '#/definitions/response.Response'
       summary: User Login
+      tags:
+      - auth
+  /sing_in_by_tg:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint allows users to sign in using their email and sends
+        OTP code to chat.
+      parameters:
+      - description: Sign-in parameters
+        in: body
+        name: ssomodels.LogInViaTg
+        required: true
+        schema:
+          $ref: '#/definitions/ssomodels.LogInViaTg'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/authhandler.SingInByTgResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: User Login by telegram bot
       tags:
       - auth
   /sing_up:

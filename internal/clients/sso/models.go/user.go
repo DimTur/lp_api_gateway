@@ -20,6 +20,10 @@ type LogInResp struct {
 	RefreshToken string
 }
 
+type LogInViaTg struct {
+	Email string `json:"email" validate:"required,email"`
+}
+
 type LogInViaTgResp struct {
 	Success bool
 	Info    string

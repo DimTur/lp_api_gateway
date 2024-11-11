@@ -11,6 +11,7 @@ import (
 	ssogrpc "github.com/DimTur/lp_api_gateway/internal/clients/sso/grpc"
 	"github.com/DimTur/lp_api_gateway/internal/config"
 	"github.com/DimTur/lp_api_gateway/internal/lib/api/validation"
+	ssoservice "github.com/DimTur/lp_api_gateway/internal/services/sso"
 	"github.com/DimTur/lp_api_gateway/pkg/meter"
 	"github.com/DimTur/lp_api_gateway/pkg/tracer"
 	"github.com/spf13/cobra"
@@ -68,12 +69,14 @@ func NewServeCmd() *cobra.Command {
 
 			validate := validation.InitValidator()
 
+			ssoService := ssoservice.New(log, validate, ssoClient, ssoClient)
+
 			application, err := app.NewApp(
 				cfg.HTTPServer.Address,
 				cfg.HTTPServer.Timeout,
 				cfg.HTTPServer.Timeout,
 				cfg.HTTPServer.IddleTimeout,
-				*ssoClient,
+				*ssoService,
 				*lpClient,
 				log,
 				validate,

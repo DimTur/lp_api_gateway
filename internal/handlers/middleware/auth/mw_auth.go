@@ -10,8 +10,6 @@ import (
 	ssomodels "github.com/DimTur/lp_api_gateway/internal/clients/sso/models.go"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-playground/validator/v10"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
 )
 
 type AuthService interface {
@@ -30,10 +28,6 @@ func AuthMiddleware(log *slog.Logger, val *validator.Validate, authService AuthS
 				slog.String("url", r.URL.String()),
 			)
 
-			tracer := otel.Tracer("AuthTracer")
-			_, span := tracer.Start(r.Context(), "AuthMiddleware")
-			defer span.End()
-
 			accessToken := r.Header.Get("Authorization")
 			if accessToken == "" {
 				log.Info("authorization token not provided")
@@ -42,7 +36,6 @@ func AuthMiddleware(log *slog.Logger, val *validator.Validate, authService AuthS
 				return
 			}
 
-			span.AddEvent("started_auth_cheking")
 			authCheck := &ssomodels.AuthCheck{
 				AccessToken: accessToken,
 			}
@@ -68,8 +61,6 @@ func AuthMiddleware(log *slog.Logger, val *validator.Validate, authService AuthS
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
-			span.AddEvent("completed_auth_cheking")
-			span.SetAttributes(attribute.String("userID", resp.UserID))
 
 			r.Header.Set("X-User-ID", resp.UserID)
 

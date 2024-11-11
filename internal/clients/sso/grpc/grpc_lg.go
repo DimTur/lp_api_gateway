@@ -162,7 +162,7 @@ func (c *Client) GetLearningGroups(ctx context.Context, uID *ssomodels.GetLGroup
 	if err != nil {
 		switch status.Code(err) {
 		case codes.NotFound:
-			c.log.Error("group not found", slog.String("err", err.Error()))
+			c.log.Error("groups not found", slog.String("err", err.Error()))
 			return nil, fmt.Errorf("%s: %w", op, ErrGroupNotFound)
 		default:
 			c.log.Error("internal error", slog.String("err", err.Error()))
