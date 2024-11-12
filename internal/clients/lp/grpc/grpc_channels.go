@@ -51,7 +51,8 @@ func (c *Client) GetChannel(ctx context.Context, channel *lpmodels.GetChannel) (
 	const op = "lp.grpc.GetChannel"
 
 	resp, err := c.api.GetChannel(ctx, &lpv1.GetChannelRequest{
-		Id: channel.ChannelID,
+		ChannelId:        channel.ChannelID,
+		LearningGroupIds: channel.LearningGroupIds,
 	})
 	if err != nil {
 		switch status.Code(err) {
@@ -70,8 +71,8 @@ func (c *Client) GetChannel(ctx context.Context, channel *lpmodels.GetChannel) (
 		Description:    resp.Channel.Description,
 		CreatedBy:      resp.Channel.CreatedBy,
 		LastModifiedBy: resp.Channel.LastModifiedBy,
-		CreatedAt:      resp.Channel.CreatedAt.AsTime(),
-		Modified:       resp.Channel.Modified.AsTime(),
+		CreatedAt:      resp.Channel.CreatedAt,
+		Modified:       resp.Channel.Modified,
 		Plans:          make([]*lpmodels.Plan, len(resp.Channel.Plans)),
 	}
 
@@ -84,10 +85,122 @@ func (c *Client) GetChannel(ctx context.Context, channel *lpmodels.GetChannel) (
 			LastModifiedBy: plan.LastModifiedBy,
 			IsPublished:    plan.IsPublished,
 			Public:         plan.Public,
-			CreatedAt:      plan.CreatedAt.AsTime(),
-			Modified:       plan.Modified.AsTime(),
+			CreatedAt:      plan.CreatedAt,
+			Modified:       plan.Modified,
 		}
 	}
 
 	return channelResponse, nil
+}
+
+func (c *Client) GetChannels(ctx context.Context, inputParam *lpmodels.GetChannels) ([]lpmodels.Channel, error) {
+	const op = "lp.grpc.GetChannels"
+
+	resp, err := c.api.GetChannels(ctx, &lpv1.GetChannelsRequest{
+		LearningGroupIds: inputParam.LearningGroupIds,
+		Limit:            inputParam.Limit,
+		Offset:           inputParam.Offset,
+	})
+	if err != nil {
+		switch status.Code(err) {
+		case codes.NotFound:
+			c.log.Error("channels not found", slog.String("err", err.Error()))
+			return nil, fmt.Errorf("%s: %w", op, ErrChannelNotFound)
+		case codes.InvalidArgument:
+			c.log.Error("bad request", slog.String("err", err.Error()))
+			return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+		default:
+			c.log.Error("internal error", slog.String("err", err.Error()))
+			return nil, fmt.Errorf("%s: %w", op, ErrInternal)
+		}
+	}
+
+	var chanResp []lpmodels.Channel
+	for _, channel := range resp.Channels {
+		chanResp = append(chanResp, lpmodels.Channel{
+			ID:             channel.Id,
+			Name:           channel.Name,
+			Description:    channel.Description,
+			CreatedBy:      channel.CreatedBy,
+			LastModifiedBy: channel.LastModifiedBy,
+			CreatedAt:      channel.CreatedAt,
+			Modified:       channel.Modified,
+		})
+	}
+
+	return chanResp, nil
+}
+
+func (c *Client) UpdateChannel(ctx context.Context, updChannel *lpmodels.UpdateChannel) (*lpmodels.UpdateChannelResponse, error) {
+	const op = "lp.grpc.UpdateChannel"
+
+	resp, err := c.api.UpdateChannel(ctx, &lpv1.UpdateChannelRequest{
+		UserId:       updChannel.UserID,
+		AdminInLgIds: updChannel.AdminInLgIds,
+		ChannelId:    updChannel.ChannelID,
+		Name:         updChannel.Name,
+		Description:  updChannel.Description,
+	})
+	if err != nil {
+		switch status.Code(err) {
+		case codes.InvalidArgument:
+			c.log.Error("bad request", slog.String("err", err.Error()))
+			return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+		default:
+			c.log.Error("internal error", slog.String("err", err.Error()))
+			return nil, fmt.Errorf("%s: %w", op, ErrInternal)
+		}
+	}
+
+	return &lpmodels.UpdateChannelResponse{
+		ID:      resp.Id,
+		Success: true,
+	}, nil
+}
+
+func (c *Client) DeleteChannel(ctx context.Context, delChannel *lpmodels.DelChByID) (*lpmodels.DelChByIDResp, error) {
+	const op = "lp.grpc.DeleteChannel"
+
+	resp, err := c.api.DeleteChannel(ctx, &lpv1.DeleteChannelRequest{
+		ChannelId:    delChannel.ChannelID,
+		AdminInLgIds: delChannel.AdminInLgIds,
+	})
+	if err != nil {
+		switch status.Code(err) {
+		case codes.NotFound:
+			c.log.Error("channel not found", slog.String("err", err.Error()))
+			return nil, fmt.Errorf("%s: %w", op, ErrChannelNotFound)
+		default:
+			c.log.Error("internal error", slog.String("err", err.Error()))
+			return nil, fmt.Errorf("%s: %w", op, ErrInternal)
+		}
+	}
+
+	return &lpmodels.DelChByIDResp{
+		Success: resp.Success,
+	}, nil
+}
+
+func (c *Client) ShareChannelToGroup(ctx context.Context, s *lpmodels.SharingChannel) (*lpmodels.SharingChannelResp, error) {
+	const op = "lp.grpc.ShareChannelToGroup"
+
+	resp, err := c.api.ShareChannelToGroup(ctx, &lpv1.ShareChannelToGroupRequest{
+		ChannelId:  s.ChannelID,
+		LgroupsIds: s.LGroupIDs,
+		CreatedBy:  s.CreatedBy,
+	})
+	if err != nil {
+		switch status.Code(err) {
+		case codes.InvalidArgument:
+			c.log.Error("bad request", slog.String("err", err.Error()))
+			return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+		default:
+			c.log.Error("internal error", slog.String("err", err.Error()))
+			return nil, fmt.Errorf("%s: %w", op, ErrInternal)
+		}
+	}
+
+	return &lpmodels.SharingChannelResp{
+		Success: resp.Success,
+	}, nil
 }
