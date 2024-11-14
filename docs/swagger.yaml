@@ -62,7 +62,19 @@ definitions:
       success:
         type: boolean
     type: object
-  channelshandler.CreateChannelResponce:
+  channelshandler.CreateChannelRequest:
+    properties:
+      description:
+        type: string
+      learning_group_id:
+        type: string
+      name:
+        type: string
+    required:
+    - learning_group_id
+    - name
+    type: object
+  channelshandler.CreateChannelResponse:
     properties:
       channel_id:
         type: integer
@@ -71,13 +83,58 @@ definitions:
       status:
         type: string
     type: object
-  channelshandler.GetChannelResponce:
+  channelshandler.DeleteChannelResponse:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+      success:
+        type: boolean
+    type: object
+  channelshandler.GetChannelResponse:
     properties:
       channel:
         $ref: '#/definitions/lpmodels.GetChannelResponse'
       error:
         type: string
       status:
+        type: string
+    type: object
+  channelshandler.GetChannelsResponse:
+    properties:
+      channels:
+        items:
+          $ref: '#/definitions/lpmodels.Channel'
+        type: array
+      error:
+        type: string
+      status:
+        type: string
+    type: object
+  channelshandler.ShareChannelRequest:
+    properties:
+      lgroup_ids:
+        items:
+          type: string
+        type: array
+    required:
+    - lgroup_ids
+    type: object
+  channelshandler.ShareChannelResponse:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+      success:
+        type: boolean
+    type: object
+  channelshandler.UpdateChannelRequest:
+    properties:
+      description:
+        type: string
+      name:
         type: string
     type: object
   learninggrouphandler.CreateLGroupResponse:
@@ -147,17 +204,22 @@ definitions:
       name:
         type: string
     type: object
-  lpmodels.CreateChannel:
+  lpmodels.Channel:
     properties:
-      created_by:
+      createdAt:
+        type: string
+      createdBy:
         type: string
       description:
         type: string
+      id:
+        type: integer
+      lastModifiedBy:
+        type: string
+      modified:
+        type: string
       name:
         type: string
-    required:
-    - created_by
-    - name
     type: object
   lpmodels.GetChannelResponse:
     properties:
@@ -315,6 +377,255 @@ info:
   title: Learning Platform API
   version: 0.1.0
 paths:
+  /channels:
+    get:
+      consumes:
+      - application/json
+      description: This endpoint returns channels information relevant for user.
+      parameters:
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/channelshandler.GetChannelsResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Channels not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get channels information
+      tags:
+      - channels
+    post:
+      consumes:
+      - application/json
+      description: This endpoint allows users to create a new channel with the specified
+        data.
+      parameters:
+      - description: Channel creation parameters
+        in: body
+        name: channelshandler.CreateChannelRequest
+        required: true
+        schema:
+          $ref: '#/definitions/channelshandler.CreateChannelRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/channelshandler.CreateChannelResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new channel
+      tags:
+      - channels
+  /channels/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: This endpoint allows channel id and delete it.
+      parameters:
+      - description: ID of the channel
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/channelshandler.DeleteChannelResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Channels not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete channel by id
+      tags:
+      - channels
+    get:
+      consumes:
+      - application/json
+      description: This endpoint returns channel information by ID.
+      parameters:
+      - description: ID of the channel
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/channelshandler.GetChannelResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Channel not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get channel information
+      tags:
+      - channels
+    patch:
+      consumes:
+      - application/json
+      description: This endpoint allows channel id and update it.
+      parameters:
+      - description: Channels getting parameters
+        in: body
+        name: channelshandler.UpdateChannelRequest
+        required: true
+        schema:
+          $ref: '#/definitions/channelshandler.UpdateChannelRequest'
+      - description: ID of the channel
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/channelshandler.GetChannelResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Channels not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update channel by id
+      tags:
+      - channels
+  /channels/{id}/share:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint allows channel id and learning group id and share
+        with.
+      parameters:
+      - description: Channels getting parameters
+        in: body
+        name: channelshandler.ShareChannelRequest
+        required: true
+        schema:
+          $ref: '#/definitions/channelshandler.ShareChannelRequest'
+      - description: ID of the channel
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/channelshandler.ShareChannelResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Channels not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Share channel by id
+      tags:
+      - channels
   /check_otp:
     post:
       consumes:
@@ -350,85 +661,13 @@ paths:
       summary: User Login by telegram bot
       tags:
       - auth
-  /create_channel:
-    post:
-      consumes:
-      - application/json
-      description: This endpoint allows users to create a new channel with the specified
-        data.
-      parameters:
-      - description: Channel creation parameters
-        in: body
-        name: lpmodels.CreateChannel
-        required: true
-        schema:
-          $ref: '#/definitions/lpmodels.CreateChannel'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/channelshandler.CreateChannelResponce'
-        "400":
-          description: Invalid data in the request
-          schema:
-            $ref: '#/definitions/response.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "500":
-          description: Server error
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: Create a new channel
-      tags:
-      - channels
-  /get_channel/{id}:
-    get:
-      consumes:
-      - application/json
-      description: This endpoint returns channel information by ID.
-      parameters:
-      - description: ID of the channel
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/channelshandler.GetChannelResponce'
-        "400":
-          description: Invalid data in the request
-          schema:
-            $ref: '#/definitions/response.Response'
-        "404":
-          description: Channel not found
-          schema:
-            $ref: '#/definitions/response.Response'
-        "500":
-          description: Server error
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: Get channel information
-      tags:
-      - channels
   /learning_group/{id}:
     delete:
       consumes:
       - application/json
       description: This endpoint allows learning group id and delete it.
       parameters:
-      - description: ID of the channel
+      - description: ID of the learning group
         in: path
         name: id
         required: true
@@ -442,6 +681,10 @@ paths:
             $ref: '#/definitions/learninggrouphandler.DeleteLGroupResponse'
         "400":
           description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/response.Response'
         "500":
@@ -458,7 +701,7 @@ paths:
       - application/json
       description: This endpoint allows learning group id and returns lg info.
       parameters:
-      - description: ID of the channel
+      - description: ID of the learning group
         in: path
         name: id
         required: true
@@ -472,6 +715,10 @@ paths:
             $ref: '#/definitions/learninggrouphandler.GetLgByIDResponse'
         "400":
           description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/response.Response'
         "404":
@@ -492,7 +739,7 @@ paths:
       - application/json
       description: This endpoint allows learning group id and update it.
       parameters:
-      - description: ID of the channel
+      - description: ID of the learning group
         in: path
         name: id
         required: true
@@ -577,6 +824,10 @@ paths:
             $ref: '#/definitions/learninggrouphandler.CreateLGroupResponse'
         "400":
           description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/response.Response'
         "409":

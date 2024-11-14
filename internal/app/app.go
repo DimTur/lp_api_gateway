@@ -5,8 +5,8 @@ import (
 	"time"
 
 	httpapp "github.com/DimTur/lp_api_gateway/internal/app/http"
-	lpgrpc "github.com/DimTur/lp_api_gateway/internal/clients/lp/grpc"
 	"github.com/DimTur/lp_api_gateway/internal/handlers"
+	lpservice "github.com/DimTur/lp_api_gateway/internal/services/lp"
 	ssoservice "github.com/DimTur/lp_api_gateway/internal/services/sso"
 	"github.com/go-playground/validator/v10"
 	"go.opentelemetry.io/otel/metric"
@@ -23,7 +23,7 @@ func NewApp(
 	writeTimeout time.Duration,
 	iddleTimeout time.Duration,
 	ssoService ssoservice.SsoService,
-	lpGRPCClient lpgrpc.Client,
+	lpservice lpservice.LpService,
 	logger *slog.Logger,
 	validator *validator.Validate,
 	traceProvider trace.TracerProvider,
@@ -31,7 +31,7 @@ func NewApp(
 ) (*App, error) {
 	routerConfigurator := handlers.NewChiRouterConfigurator(
 		ssoService,
-		lpGRPCClient,
+		lpservice,
 		logger,
 		validator,
 		traceProvider,

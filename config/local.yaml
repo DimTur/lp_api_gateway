@@ -20,3 +20,8 @@ tracer:
 meter:
   prometheus:
     service_name: "api_gateway"
+redis:
+  host: localhost
+  port: 6379
+  permissions_db: 2
+  password: ""

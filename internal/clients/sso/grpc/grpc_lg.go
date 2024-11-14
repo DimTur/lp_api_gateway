@@ -186,3 +186,70 @@ func (c *Client) GetLearningGroups(ctx context.Context, uID *ssomodels.GetLGroup
 
 	return resp, nil
 }
+
+func (c *Client) IsGroupAdmin(ctx context.Context, uIsGroupAdmin *ssomodels.IsGroupAdmin) (*ssomodels.IsGroupAdminResp, error) {
+	const op = "sso.grpc_lg.IsGroupAdmin"
+
+	resp, err := c.api.IsGroupAdmin(ctx, &ssov1.IsGroupAdminRequest{
+		UserId:          uIsGroupAdmin.UserID,
+		LearningGroupId: uIsGroupAdmin.LgID,
+	})
+	if err != nil {
+		switch status.Code(err) {
+		case codes.NotFound:
+			c.log.Error("group not found", slog.String("err", err.Error()))
+			return nil, fmt.Errorf("%s: %w", op, ErrGroupNotFound)
+		default:
+			c.log.Error("internal error", slog.String("err", err.Error()))
+			return nil, fmt.Errorf("%s: %w", op, ErrInternal)
+		}
+	}
+
+	return &ssomodels.IsGroupAdminResp{
+		IsGroupAdmin: resp.IsGroupAdmin,
+	}, nil
+}
+
+func (c *Client) UserIsGroupAdminIn(ctx context.Context, user *ssomodels.UserIsGroupAdminIn) ([]string, error) {
+	const op = "sso.grpc_lg.UserIsGroupAdminIn"
+
+	resp, err := c.api.IsUserGroupAdminIn(ctx, &ssov1.IsUserGroupAdminInRequest{
+		UserId: user.UserID,
+	})
+	if err != nil {
+		switch status.Code(err) {
+		case codes.NotFound:
+			c.log.Error("group not found", slog.String("err", err.Error()))
+			return nil, fmt.Errorf("%s: %w", op, ErrUserNotFound)
+		default:
+			c.log.Error("internal error", slog.String("err", err.Error()))
+			return nil, fmt.Errorf("%s: %w", op, ErrInternal)
+		}
+	}
+
+	groupIDs := append([]string{}, resp.LearningGroupIds...)
+
+	return groupIDs, nil
+}
+
+func (c *Client) UserIsLearnerIn(ctx context.Context, user *ssomodels.UserIsLearnerIn) ([]string, error) {
+	const op = "sso.grpc_lg.UserIsLearnerIn"
+
+	resp, err := c.api.IsUserLearnerIn(ctx, &ssov1.IsUserLearnereInRequest{
+		UserId: user.UserID,
+	})
+	if err != nil {
+		switch status.Code(err) {
+		case codes.NotFound:
+			c.log.Error("group not found", slog.String("err", err.Error()))
+			return nil, fmt.Errorf("%s: %w", op, ErrUserNotFound)
+		default:
+			c.log.Error("internal error", slog.String("err", err.Error()))
+			return nil, fmt.Errorf("%s: %w", op, ErrInternal)
+		}
+	}
+
+	groupIDs := append([]string{}, resp.LearningGroupIds...)
+
+	return groupIDs, nil
+}

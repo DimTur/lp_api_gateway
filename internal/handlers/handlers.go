@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"time"
 
-	lpgrpc "github.com/DimTur/lp_api_gateway/internal/clients/lp/grpc"
 	channelshandler "github.com/DimTur/lp_api_gateway/internal/handlers/learning_platform/channels"
 	authmiddleware "github.com/DimTur/lp_api_gateway/internal/handlers/middleware/auth"
 	authhandler "github.com/DimTur/lp_api_gateway/internal/handlers/sso/auth"
 	learninggrouphandler "github.com/DimTur/lp_api_gateway/internal/handlers/sso/learning_group"
+	lpservice "github.com/DimTur/lp_api_gateway/internal/services/lp"
 	ssoservice "github.com/DimTur/lp_api_gateway/internal/services/sso"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -28,7 +28,7 @@ type RouterConfigurator interface {
 
 type ChiRouterConfigurator struct {
 	SsoService     ssoservice.SsoService
-	LPGRPCClient   lpgrpc.Client
+	LpService      lpservice.LpService
 	Logger         *slog.Logger
 	validator      *validator.Validate
 	TracerProvider trace.TracerProvider
@@ -37,7 +37,7 @@ type ChiRouterConfigurator struct {
 
 func NewChiRouterConfigurator(
 	ssoService ssoservice.SsoService,
-	lpGRPCClient lpgrpc.Client,
+	lpService lpservice.LpService,
 	logger *slog.Logger,
 	validator *validator.Validate,
 	tracerProvider trace.TracerProvider,
@@ -45,7 +45,7 @@ func NewChiRouterConfigurator(
 ) *ChiRouterConfigurator {
 	return &ChiRouterConfigurator{
 		SsoService:     ssoService,
-		LPGRPCClient:   lpGRPCClient,
+		LpService:      lpService,
 		Logger:         logger,
 		validator:      validator,
 		TracerProvider: tracerProvider,
@@ -105,8 +105,12 @@ func (c *ChiRouterConfigurator) ConfigureRouter() http.Handler {
 	// Learning Platform
 	router.Group(func(r chi.Router) {
 		r.Use(authmiddleware.AuthMiddleware(c.Logger, c.validator, &c.SsoService))
-		r.Post("/create_channel", channelshandler.CreateChannel(c.Logger, c.validator, &c.LPGRPCClient))
-		r.Get("/get_channel/{id}", channelshandler.GetChannel(c.Logger, c.validator, &c.LPGRPCClient))
+		r.Post("/channels", channelshandler.CreateChannel(c.Logger, c.validator, &c.LpService))
+		r.Get("/channels/{id}", channelshandler.GetChannel(c.Logger, c.validator, &c.LpService))
+		r.Get("/channels", channelshandler.GetChannels(c.Logger, c.validator, &c.LpService))
+		r.Patch("/channels/{id}", channelshandler.UpdateChannel(c.Logger, c.validator, &c.LpService))
+		r.Delete("/channels/{id}", channelshandler.DeleteChannel(c.Logger, c.validator, &c.LpService))
+		r.Post("/channels/{id}/share", channelshandler.ShareChannel(c.Logger, c.validator, &c.LpService))
 	})
 
 	return router

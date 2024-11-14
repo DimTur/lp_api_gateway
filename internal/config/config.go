@@ -11,6 +11,7 @@ type Config struct {
 	Clients    ClientsConfig `yaml:"clients"`
 	Tracer     OpenTelemetry `yaml:"tracer"`
 	Meter      Prometheus    `yaml:"meter"`
+	Redis      Redis         `yaml:"redis"`
 }
 
 type HTTPServer struct {
@@ -46,6 +47,13 @@ type OpenTelemetry struct {
 
 type Prometheus struct {
 	Prometheus Meter `yaml:"prometheus"`
+}
+
+type Redis struct {
+	Host          string `yaml:"host"`
+	Port          int    `yaml:"port"`
+	PermissionsDB int    `yaml:"permissions_db"`
+	Password      string `yaml:"password"`
 }
 
 func Parse(s string) (*Config, error) {

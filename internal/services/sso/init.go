@@ -23,6 +23,7 @@ type LgServiceProvider interface {
 	UpdateLearningGroup(ctx context.Context, updFields *ssomodels.UpdateLearningGroup) (*ssomodels.UpdateLearningGroupResp, error)
 	DeleteLearningGroup(ctx context.Context, lgID *ssomodels.DelLgByID) (*ssomodels.DelLgByIDResp, error)
 	GetLearningGroups(ctx context.Context, uID *ssomodels.GetLGroups) (*ssomodels.GetLGroupsResp, error)
+	UserIsLearnerIn(ctx context.Context, user *ssomodels.UserIsLearnerIn) ([]string, error)
 }
 
 type SsoService struct {

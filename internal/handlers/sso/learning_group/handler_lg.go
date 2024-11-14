@@ -43,6 +43,7 @@ type LgService interface {
 // @Param        learninggrouphandler.CreateLearningGroupRequest body learninggrouphandler.CreateLearningGroupRequest true "Creating parameters"
 // @Success      201 {object} learninggrouphandler.CreateLGroupResponse
 // @Failure      400 {object} response.Response "Invalid data in the request"
+// @Failure      401 {object} response.Response "Unauthorized"
 // @Failure      409 {object} response.Response "Conflict"
 // @Failure      500 {object} response.Response "Server error"
 // @Router       /learning_groups [post]
@@ -60,6 +61,12 @@ func CreateLearningGroup(log *slog.Logger, val *validator.Validate, lgService Lg
 		meter.SignUpReqCount.Add(r.Context(), 1)
 
 		uID := r.Header.Get("X-User-ID")
+		if uID == "" {
+			log.Error("missing X-User-ID in headers")
+			w.WriteHeader(http.StatusUnauthorized)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
 		var req CreateLearningGroupRequest
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
@@ -80,6 +87,10 @@ func CreateLearningGroup(log *slog.Logger, val *validator.Validate, lgService Lg
 		})
 		if err != nil {
 			switch {
+			case errors.Is(err, ssoservice.ErrPermissionDenied):
+				log.Error("permissions denied", slog.String("err", err.Error()))
+				w.WriteHeader(http.StatusBadRequest)
+				render.JSON(w, r, response.Error("permissions denied"))
 			case errors.Is(err, ssoservice.ErrInvalidCredentials):
 				log.Error("invalid credentinals", slog.Any("name", req.Name))
 				w.WriteHeader(http.StatusBadRequest)
@@ -116,6 +127,7 @@ func CreateLearningGroup(log *slog.Logger, val *validator.Validate, lgService Lg
 // @Param        id path string true "ID of the learning group"
 // @Success      200 {object} learninggrouphandler.GetLgByIDResponse
 // @Failure      400 {object} response.Response "Invalid data in the request"
+// @Failure      401 {object} response.Response "Unauthorized"
 // @Failure      404 {object} response.Response "Not Found"
 // @Failure      500 {object} response.Response "Server error"
 // @Router       /learning_group/{id} [get]
@@ -133,6 +145,12 @@ func GetLearningGroupByID(log *slog.Logger, val *validator.Validate, lgService L
 		meter.SignUpReqCount.Add(r.Context(), 1)
 
 		uID := r.Header.Get("X-User-ID")
+		if uID == "" {
+			log.Error("missing X-User-ID in headers")
+			w.WriteHeader(http.StatusUnauthorized)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
 		lgID := chi.URLParam(r, "id")
 		if lgID == "" {
 			log.Error("missing learning group ID in query params")
@@ -150,6 +168,10 @@ func GetLearningGroupByID(log *slog.Logger, val *validator.Validate, lgService L
 		})
 		if err != nil {
 			switch {
+			case errors.Is(err, ssoservice.ErrPermissionDenied):
+				log.Error("permissions denied", slog.String("err", err.Error()))
+				w.WriteHeader(http.StatusBadRequest)
+				render.JSON(w, r, response.Error("permissions denied"))
 			case errors.Is(err, ssoservice.ErrInvalidCredentials):
 				log.Error("invalid credentinals", slog.Any("learning_group_id", lgID))
 				w.WriteHeader(http.StatusBadRequest)
@@ -214,9 +236,10 @@ func UpdateLearningGroup(log *slog.Logger, val *validator.Validate, lgService Lg
 
 		uID := r.Header.Get("X-User-ID")
 		lgID := chi.URLParam(r, "id")
-		if lgID == "" {
-			log.Error("missing learning group ID in query params")
-			http.Error(w, "Bad Request", http.StatusBadRequest)
+		if uID == "" {
+			log.Error("missing X-User-ID in headers")
+			w.WriteHeader(http.StatusUnauthorized)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
 		log.Info("request received to update learning group",
@@ -234,6 +257,10 @@ func UpdateLearningGroup(log *slog.Logger, val *validator.Validate, lgService Lg
 		})
 		if err != nil {
 			switch {
+			case errors.Is(err, ssoservice.ErrPermissionDenied):
+				log.Error("permissions denied", slog.String("err", err.Error()))
+				w.WriteHeader(http.StatusBadRequest)
+				render.JSON(w, r, response.Error("permissions denied"))
 			case errors.Is(err, ssoservice.ErrGroupNotFound):
 				log.Error("learning group not found", slog.Any("learning_group_id", lgID))
 				w.WriteHeader(http.StatusBadRequest)
@@ -270,6 +297,7 @@ func UpdateLearningGroup(log *slog.Logger, val *validator.Validate, lgService Lg
 // @Param        id path string true "ID of the learning group"
 // @Success      200 {object} learninggrouphandler.DeleteLGroupResponse
 // @Failure      400 {object} response.Response "Invalid data in the request"
+// @Failure      401 {object} response.Response "Unauthorized"
 // @Failure      500 {object} response.Response "Server error"
 // @Router       /learning_group/{id} [delete]
 // @Security ApiKeyAuth
@@ -287,9 +315,10 @@ func DeleteLearningGroup(log *slog.Logger, val *validator.Validate, lgService Lg
 
 		uID := r.Header.Get("X-User-ID")
 		lgID := chi.URLParam(r, "id")
-		if lgID == "" {
-			log.Error("missing learning group ID in query params")
-			http.Error(w, "Bad Request", http.StatusBadRequest)
+		if uID == "" {
+			log.Error("missing X-User-ID in headers")
+			w.WriteHeader(http.StatusUnauthorized)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
 		log.Info("request received to delete learning group",
@@ -355,6 +384,12 @@ func GetLearningGroups(log *slog.Logger, val *validator.Validate, lgService LgSe
 		meter.SignUpReqCount.Add(r.Context(), 1)
 
 		uID := r.Header.Get("X-User-ID")
+		if uID == "" {
+			log.Error("missing X-User-ID in headers")
+			w.WriteHeader(http.StatusUnauthorized)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
 		log.Info("request received to get learning group", slog.Any("request from", uID))
 
 		resp, err := lgService.GetLearningGroups(r.Context(), &ssomodels.GetLGroups{
@@ -362,6 +397,10 @@ func GetLearningGroups(log *slog.Logger, val *validator.Validate, lgService LgSe
 		})
 		if err != nil {
 			switch {
+			case errors.Is(err, ssoservice.ErrPermissionDenied):
+				log.Error("permissions denied", slog.String("err", err.Error()))
+				w.WriteHeader(http.StatusBadRequest)
+				render.JSON(w, r, response.Error("permissions denied"))
 			case errors.Is(err, ssoservice.ErrGroupNotFound):
 				log.Error("learning group not found", slog.Any("user_id", uID))
 				w.WriteHeader(http.StatusBadRequest)

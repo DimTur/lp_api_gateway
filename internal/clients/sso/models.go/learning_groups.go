@@ -85,3 +85,11 @@ type IsGroupAdmin struct {
 type IsGroupAdminResp struct {
 	IsGroupAdmin bool
 }
+
+type UserIsGroupAdminIn struct {
+	UserID string `json:"user_id" validate:"required"`
+}
+
+type UserIsLearnerIn struct {
+	UserID string `json:"user_id" validate:"required"`
+}

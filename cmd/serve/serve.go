@@ -11,7 +11,10 @@ import (
 	ssogrpc "github.com/DimTur/lp_api_gateway/internal/clients/sso/grpc"
 	"github.com/DimTur/lp_api_gateway/internal/config"
 	"github.com/DimTur/lp_api_gateway/internal/lib/api/validation"
+	lpservice "github.com/DimTur/lp_api_gateway/internal/services/lp"
+	"github.com/DimTur/lp_api_gateway/internal/services/permissions.go"
 	ssoservice "github.com/DimTur/lp_api_gateway/internal/services/sso"
+	"github.com/DimTur/lp_api_gateway/internal/services/storage/redis"
 	"github.com/DimTur/lp_api_gateway/pkg/meter"
 	"github.com/DimTur/lp_api_gateway/pkg/tracer"
 	"github.com/spf13/cobra"
@@ -67,9 +70,22 @@ func NewServeCmd() *cobra.Command {
 				return err
 			}
 
+			redisPermissions := &redis.RedisPermissions{
+				Host:     cfg.Redis.Host,
+				Port:     cfg.Redis.Port,
+				DB:       cfg.Redis.PermissionsDB,
+				Password: cfg.Redis.Password,
+			}
+			redisPerm, err := redis.NewRedisClient(*redisPermissions)
+			if err != nil {
+				log.Error("failed to close redis", slog.Any("err", err))
+			}
+
 			validate := validation.InitValidator()
 
+			permService := permissions.New(log, validate, lpClient, ssoClient, redisPerm)
 			ssoService := ssoservice.New(log, validate, ssoClient, ssoClient)
+			lpService := lpservice.New(log, validate, lpClient, ssoClient, *permService)
 
 			application, err := app.NewApp(
 				cfg.HTTPServer.Address,
@@ -77,7 +93,7 @@ func NewServeCmd() *cobra.Command {
 				cfg.HTTPServer.Timeout,
 				cfg.HTTPServer.IddleTimeout,
 				*ssoService,
-				*lpClient,
+				*lpService,
 				log,
 				validate,
 				traceService,
