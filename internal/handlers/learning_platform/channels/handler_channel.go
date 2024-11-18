@@ -33,8 +33,6 @@ type LPService interface {
 	ShareChannelToGroup(ctx context.Context, s *lpmodels.SharingChannel) (*lpmodels.SharingChannelResp, error)
 }
 
-var Validate = validator.New()
-
 // CreateChannel godoc
 // @Summary      Create a new channel
 // @Description  This endpoint allows users to create a new channel with the specified data.
@@ -411,7 +409,7 @@ func DeleteChannel(log *slog.Logger, val *validator.Validate, lpService LPServic
 			return
 		}
 
-		upd, err := lpService.DeleteChannel(r.Context(), &lpmodels.DelChByID{
+		del, err := lpService.DeleteChannel(r.Context(), &lpmodels.DelChByID{
 			UserID:    uID,
 			ChannelID: channelID,
 		})
@@ -440,7 +438,7 @@ func DeleteChannel(log *slog.Logger, val *validator.Validate, lpService LPServic
 
 		render.JSON(w, r, DeleteChannelResponse{
 			Response: response.OK(),
-			Success:  upd.Success,
+			Success:  del.Success,
 		})
 	}
 }
@@ -451,7 +449,7 @@ func DeleteChannel(log *slog.Logger, val *validator.Validate, lpService LPServic
 // @Tags         channels
 // @Accept       json
 // @Produce      json
-// @Param        channelshandler.ShareChannelRequest body channelshandler.ShareChannelRequest true "Channels getting parameters"
+// @Param        channelshandler.ShareChannelRequest body channelshandler.ShareChannelRequest true "Channels sharing parameters"
 // @Param        id path int true "ID of the channel"
 // @Success      200 {object} channelshandler.ShareChannelResponse
 // @Failure      400 {object} response.Response "Invalid data in the request"
@@ -518,7 +516,7 @@ func ShareChannel(log *slog.Logger, val *validator.Validate, lpService LPService
 				w.WriteHeader(http.StatusBadRequest)
 				render.JSON(w, r, response.Error("bad request"))
 			default:
-				log.Error("failed to delete channel", slog.String("err", err.Error()))
+				log.Error("failed to share channel", slog.String("err", err.Error()))
 				w.WriteHeader(http.StatusInternalServerError)
 				render.JSON(w, r, response.Error("Internal Server Error"))
 			}

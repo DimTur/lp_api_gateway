@@ -144,6 +144,292 @@ const docTemplate = `{
                 }
             }
         },
+        "/channels/{channel_id}/plans/{plan_id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "This endpoint returns plan information by ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plans"
+                ],
+                "summary": "Get plan information",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of the channel",
+                        "name": "channel_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the plan",
+                        "name": "plan_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/planshandler.GetPlanResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data in the request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Channel not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "This endpoint allows plan id and delete it.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plans"
+                ],
+                "summary": "Delete plan by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of the channel",
+                        "name": "channel_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the plan",
+                        "name": "plan_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/planshandler.DeletePlanResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data in the request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Channel not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "This endpoint allows plan id and update it.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plans"
+                ],
+                "summary": "Update channel by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of the channel",
+                        "name": "channel_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the plan",
+                        "name": "plan_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Plan getting parameters",
+                        "name": "planshandler.UpdatePlanRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/planshandler.UpdatePlanRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/planshandler.UpdatePlanResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data in the request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Channels not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/channels/{channel_id}/plans/{plan_id}/share": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "This endpoint allows plan id and user ids and share with.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plans"
+                ],
+                "summary": "Share plan by id",
+                "parameters": [
+                    {
+                        "description": "Plan shering parameters",
+                        "name": "planshandler.SharePlanRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/planshandler.SharePlanRequest"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the channel",
+                        "name": "channel_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the plan",
+                        "name": "plan_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/planshandler.SharePlanResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data in the request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Channels not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/channels/{id}": {
             "get": {
                 "security": [
@@ -332,6 +618,147 @@ const docTemplate = `{
                 }
             }
         },
+        "/channels/{id}/plans": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "This endpoint returns plans information relevant for user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plans"
+                ],
+                "summary": "Get all plans relevant for user",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of the channel",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/planshandler.GetPlansResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data in the request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "This endpoint allows users to create a new plan with the specified data.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plans"
+                ],
+                "summary": "Create a new plan",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of the channel",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Plan creation parameters",
+                        "name": "planshandler.CreatePlanRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/planshandler.CreatePlanRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/planshandler.CreatePlanResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data in the request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/channels/{id}/share": {
             "post": {
                 "security": [
@@ -352,7 +779,7 @@ const docTemplate = `{
                 "summary": "Share channel by id",
                 "parameters": [
                     {
-                        "description": "Channels getting parameters",
+                        "description": "Channels sharing parameters",
                         "name": "channelshandler.ShareChannelRequest",
                         "in": "body",
                         "required": true,
@@ -1313,6 +1740,38 @@ const docTemplate = `{
                 }
             }
         },
+        "lpmodels.GetPlanResponse": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "createdBy": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isPublished": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "modified": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "public": {
+                    "type": "boolean"
+                }
+            }
+        },
         "lpmodels.Plan": {
             "type": "object",
             "properties": {
@@ -1342,6 +1801,153 @@ const docTemplate = `{
                 },
                 "public": {
                     "type": "boolean"
+                }
+            }
+        },
+        "lpmodels.UpdatePlanResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "planshandler.CreatePlanRequest": {
+            "type": "object",
+            "required": [
+                "learning_group_id",
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "learning_group_id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "planshandler.CreatePlanResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "plan_id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "planshandler.DeletePlanResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "planshandler.GetPlanResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "plan": {
+                    "$ref": "#/definitions/lpmodels.GetPlanResponse"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "planshandler.GetPlansResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "plans": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/lpmodels.GetPlanResponse"
+                    }
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "planshandler.SharePlanRequest": {
+            "type": "object",
+            "required": [
+                "user_ids"
+            ],
+            "properties": {
+                "user_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "planshandler.SharePlanResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "planshandler.UpdatePlanRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "is_published": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "public": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "planshandler.UpdatePlanResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "updatePlanResponse": {
+                    "$ref": "#/definitions/lpmodels.UpdatePlanResponse"
                 }
             }
         },

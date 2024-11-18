@@ -6,6 +6,7 @@ import (
 	"time"
 
 	channelshandler "github.com/DimTur/lp_api_gateway/internal/handlers/learning_platform/channels"
+	planshandler "github.com/DimTur/lp_api_gateway/internal/handlers/learning_platform/plans"
 	authmiddleware "github.com/DimTur/lp_api_gateway/internal/handlers/middleware/auth"
 	authhandler "github.com/DimTur/lp_api_gateway/internal/handlers/sso/auth"
 	learninggrouphandler "github.com/DimTur/lp_api_gateway/internal/handlers/sso/learning_group"
@@ -105,12 +106,22 @@ func (c *ChiRouterConfigurator) ConfigureRouter() http.Handler {
 	// Learning Platform
 	router.Group(func(r chi.Router) {
 		r.Use(authmiddleware.AuthMiddleware(c.Logger, c.validator, &c.SsoService))
+
+		// Channels
 		r.Post("/channels", channelshandler.CreateChannel(c.Logger, c.validator, &c.LpService))
 		r.Get("/channels/{id}", channelshandler.GetChannel(c.Logger, c.validator, &c.LpService))
 		r.Get("/channels", channelshandler.GetChannels(c.Logger, c.validator, &c.LpService))
 		r.Patch("/channels/{id}", channelshandler.UpdateChannel(c.Logger, c.validator, &c.LpService))
 		r.Delete("/channels/{id}", channelshandler.DeleteChannel(c.Logger, c.validator, &c.LpService))
 		r.Post("/channels/{id}/share", channelshandler.ShareChannel(c.Logger, c.validator, &c.LpService))
+
+		// Plans
+		r.Post("/channels/{id}/plans", planshandler.CreatePlan(c.Logger, c.validator, &c.LpService))
+		r.Get("/channels/{channel_id}/plans/{plan_id}", planshandler.GetPlan(c.Logger, c.validator, &c.LpService))
+		r.Get("/channels/{id}/plans", planshandler.GetPlans(c.Logger, c.validator, &c.LpService))
+		r.Patch("/channels/{channel_id}/plans/{plan_id}", planshandler.UpdatePlan(c.Logger, c.validator, &c.LpService))
+		r.Delete("/channels/{channel_id}/plans/{plan_id}", planshandler.DeletePlan(c.Logger, c.validator, &c.LpService))
+		r.Post("/channels/{channel_id}/plans/{plan_id}/share", planshandler.SharePlan(c.Logger, c.validator, &c.LpService))
 	})
 
 	return router

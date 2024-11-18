@@ -55,7 +55,7 @@ func (lp *LpService) CreateChannel(ctx context.Context, newChannel *lpmodels.Cre
 	})
 	if err != nil {
 		log.Error("can't check permissions", slog.String("err", err.Error()))
-		return nil, fmt.Errorf("%s: %w", op, ErrInternal)
+		return nil, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
 	}
 	if !p {
 		log.Info("permissions denied", slog.String("user_id", newChannel.CreatedBy))
@@ -99,15 +99,18 @@ func (lp *LpService) GetChannel(ctx context.Context, channel *lpmodels.GetChanne
 	_, span := tracer.AuthTracer.Start(ctx, "GetChannel")
 	defer span.End()
 
+	span.SetAttributes(
+		attribute.String("user_id", channel.UserID),
+		attribute.Int64("channel_id", channel.ChannelID),
+	)
+
 	// Validation
 	span.AddEvent("validation_started")
 	if err := lp.Validator.Struct(channel); err != nil {
 		log.Warn("invalid parameters", slog.String("err", err.Error()))
-		return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+		return &lpmodels.GetChannelResponse{}, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 	}
 	span.AddEvent("validation_completed")
-	span.SetAttributes(attribute.String("user_id", channel.UserID))
-	span.SetAttributes(attribute.Int64("channel_id", channel.ChannelID))
 
 	// Start check permissions
 	p, err := lp.PermissionsProvider.CheckCreaterOrLearnerAndSharePermissions(ctx, &permissions.CheckPerm{
@@ -116,33 +119,28 @@ func (lp *LpService) GetChannel(ctx context.Context, channel *lpmodels.GetChanne
 	})
 	if err != nil {
 		log.Error("can't check permissions", slog.String("err", err.Error()))
-		return nil, fmt.Errorf("%s: %w", op, ErrInternal)
+		return &lpmodels.GetChannelResponse{}, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
 	}
 	if !p {
 		log.Info("permissions denied", slog.String("user_id", channel.UserID))
-		return nil, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
+		return &lpmodels.GetChannelResponse{}, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
 	}
 
 	// Start getting
 	log.Info("getting channel by id")
 	span.AddEvent("started_getting_channel_by_id")
-	resp, err := lp.ChannelProvider.GetChannel(ctx, &lpmodels.GetChannel{
-		UserID:    channel.UserID,
-		ChannelID: channel.ChannelID,
-	})
+	resp, err := lp.ChannelProvider.GetChannel(ctx, channel)
 	if err != nil {
 		switch {
 		case errors.Is(err, lpgrpc.ErrChannelNotFound):
 			log.Error("channel not found", slog.Any("channel_id", channel.ChannelID))
-			return nil, fmt.Errorf("%s: %w", op, ErrChannelNotFound)
+			return &lpmodels.GetChannelResponse{}, fmt.Errorf("%s: %w", op, ErrChannelNotFound)
 		default:
 			log.Error("failed to get channel", slog.String("err", err.Error()))
-			return nil, fmt.Errorf("%s: %w", op, ErrInternal)
+			return &lpmodels.GetChannelResponse{}, fmt.Errorf("%s: %w", op, ErrInternal)
 		}
 	}
 	span.AddEvent("completed_getting_channel_by_id")
-	span.SetAttributes(attribute.String("user_id", channel.UserID))
-	span.SetAttributes(attribute.Int64("channel_id", channel.ChannelID))
 
 	log.Info("getting channel successfully")
 
@@ -160,6 +158,10 @@ func (lp *LpService) GetChannels(ctx context.Context, inputParam *lpmodels.GetCh
 	_, span := tracer.AuthTracer.Start(ctx, "GetChannels")
 	defer span.End()
 
+	span.SetAttributes(
+		attribute.String("user_id", inputParam.UserID),
+	)
+
 	// Validation
 	span.AddEvent("validation_started")
 	if err := lp.Validator.Struct(inputParam); err != nil {
@@ -167,7 +169,6 @@ func (lp *LpService) GetChannels(ctx context.Context, inputParam *lpmodels.GetCh
 		return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 	}
 	span.AddEvent("validation_completed")
-	span.SetAttributes(attribute.String("user_id", inputParam.UserID))
 
 	// Get learning groups ids relevant for user
 	log.Info("getting learning groups ids where user is learner")
@@ -180,7 +181,6 @@ func (lp *LpService) GetChannels(ctx context.Context, inputParam *lpmodels.GetCh
 		return nil, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
 	}
 	span.AddEvent("completed_checking_permissons_for_user")
-	span.SetAttributes(attribute.String("user_id", inputParam.UserID))
 
 	// Start getting
 	log.Info("getting channels")
@@ -205,7 +205,6 @@ func (lp *LpService) GetChannels(ctx context.Context, inputParam *lpmodels.GetCh
 		}
 	}
 	span.AddEvent("completed_getting_channels")
-	span.SetAttributes(attribute.String("user_id", inputParam.UserID))
 
 	log.Info("getting channels successfully")
 
@@ -224,14 +223,21 @@ func (lp *LpService) UpdateChannel(ctx context.Context, updChannel *lpmodels.Upd
 	_, span := tracer.AuthTracer.Start(ctx, "UpdateChannel")
 	defer span.End()
 
+	span.SetAttributes(
+		attribute.String("user_id", updChannel.UserID),
+		attribute.Int64("channel_id", updChannel.ChannelID),
+	)
+
 	// Validation
 	span.AddEvent("validation_started")
 	if err := lp.Validator.Struct(updChannel); err != nil {
 		log.Warn("invalid parameters", slog.String("err", err.Error()))
-		return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+		return &lpmodels.UpdateChannelResponse{
+			ID:      0,
+			Success: false,
+		}, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 	}
 	span.AddEvent("validation_completed")
-	span.SetAttributes(attribute.String("user_id", updChannel.UserID))
 
 	// Start check permissions
 	p, err := lp.PermissionsProvider.CheckCreatorOrAdminAndSharePermissions(ctx, &permissions.CheckPerm{
@@ -240,34 +246,46 @@ func (lp *LpService) UpdateChannel(ctx context.Context, updChannel *lpmodels.Upd
 	})
 	if err != nil {
 		log.Error("can't check permissions", slog.String("err", err.Error()))
-		return nil, fmt.Errorf("%s: %w", op, ErrInternal)
+		return &lpmodels.UpdateChannelResponse{
+			ID:      0,
+			Success: false,
+		}, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
 	}
 	if !p {
 		log.Info("permissions denied", slog.String("user_id", updChannel.UserID))
-		return nil, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
+		return &lpmodels.UpdateChannelResponse{
+			ID:      0,
+			Success: false,
+		}, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
 	}
 
 	// Start updating
 	log.Info("updating channel")
 	span.AddEvent("started_update_channel")
-	resp, err := lp.ChannelProvider.UpdateChannel(ctx, &lpmodels.UpdateChannel{
-		UserID:      updChannel.UserID,
-		ChannelID:   updChannel.ChannelID,
-		Name:        updChannel.Name,
-		Description: updChannel.Description,
-	})
+	resp, err := lp.ChannelProvider.UpdateChannel(ctx, updChannel)
 	if err != nil {
 		switch {
 		case errors.Is(err, lpgrpc.ErrInvalidCredentials):
 			log.Error("bad request", slog.String("err", err.Error()))
-			return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+			return &lpmodels.UpdateChannelResponse{
+				ID:      0,
+				Success: false,
+			}, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+		case errors.Is(err, lpgrpc.ErrPlanNotFound):
+			log.Error("plan not found", slog.String("err", err.Error()))
+			return &lpmodels.UpdateChannelResponse{
+				ID:      0,
+				Success: false,
+			}, fmt.Errorf("%s: %w", op, ErrPlanNotFound)
 		default:
 			log.Error("failed to update channel", slog.String("err", err.Error()))
-			return nil, fmt.Errorf("%s: %w", op, ErrInternal)
+			return &lpmodels.UpdateChannelResponse{
+				ID:      0,
+				Success: false,
+			}, fmt.Errorf("%s: %w", op, ErrInternal)
 		}
 	}
 	span.AddEvent("completed_updating_channel")
-	span.SetAttributes(attribute.String("user_id", updChannel.UserID))
 
 	log.Info("channel updated successfully")
 
@@ -290,11 +308,11 @@ func (lp *LpService) DeleteChannel(ctx context.Context, delChannel *lpmodels.Del
 	span.AddEvent("validation_started")
 	if err := lp.Validator.Struct(delChannel); err != nil {
 		log.Warn("invalid parameters", slog.String("err", err.Error()))
-		return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+		return &lpmodels.DelChByIDResp{
+			Success: false,
+		}, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 	}
 	span.AddEvent("validation_completed")
-	span.SetAttributes(attribute.String("user_id", delChannel.UserID))
-	span.SetAttributes(attribute.Int64("channel_id", delChannel.ChannelID))
 
 	// Start check permissions
 	p, err := lp.PermissionsProvider.CheckCreatorOrAdminAndSharePermissions(ctx, &permissions.CheckPerm{
@@ -303,33 +321,36 @@ func (lp *LpService) DeleteChannel(ctx context.Context, delChannel *lpmodels.Del
 	})
 	if err != nil {
 		log.Error("can't check permissions", slog.String("err", err.Error()))
-		return nil, fmt.Errorf("%s: %w", op, ErrInternal)
+		return &lpmodels.DelChByIDResp{
+			Success: false,
+		}, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
 	}
 	if !p {
 		log.Info("permissions denied", slog.String("user_id", delChannel.UserID))
-		return nil, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
+		return &lpmodels.DelChByIDResp{
+			Success: false,
+		}, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
 	}
 
 	// Start deleting
 	log.Info("deleting channel")
 	span.AddEvent("started_delete_channel")
-	resp, err := lp.ChannelProvider.DeleteChannel(ctx, &lpmodels.DelChByID{
-		UserID:    delChannel.UserID,
-		ChannelID: delChannel.ChannelID,
-	})
+	resp, err := lp.ChannelProvider.DeleteChannel(ctx, delChannel)
 	if err != nil {
 		switch {
 		case errors.Is(err, lpgrpc.ErrChannelNotFound):
 			log.Error("channel not found", slog.String("err", err.Error()))
-			return nil, fmt.Errorf("%s: %w", op, ErrChannelNotFound)
+			return &lpmodels.DelChByIDResp{
+				Success: false,
+			}, fmt.Errorf("%s: %w", op, ErrChannelNotFound)
 		default:
 			log.Error("failed to delete channel", slog.String("err", err.Error()))
-			return nil, fmt.Errorf("%s: %w", op, ErrInternal)
+			return &lpmodels.DelChByIDResp{
+				Success: false,
+			}, fmt.Errorf("%s: %w", op, ErrInternal)
 		}
 	}
 	span.AddEvent("completed_deleting_channel")
-	span.SetAttributes(attribute.String("user_id", delChannel.UserID))
-	span.SetAttributes(attribute.Int64("channel_id", delChannel.ChannelID))
 
 	log.Info("channel deleted successfully")
 
@@ -352,7 +373,9 @@ func (lp *LpService) ShareChannelToGroup(ctx context.Context, s *lpmodels.Sharin
 	span.AddEvent("validation_started")
 	if err := lp.Validator.Struct(s); err != nil {
 		log.Warn("invalid parameters", slog.String("err", err.Error()))
-		return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+		return &lpmodels.SharingChannelResp{
+			Success: false,
+		}, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 	}
 	span.AddEvent("validation_completed")
 	span.SetAttributes(attribute.String("user_id", s.UserID))
@@ -365,11 +388,15 @@ func (lp *LpService) ShareChannelToGroup(ctx context.Context, s *lpmodels.Sharin
 	})
 	if err != nil {
 		log.Error("can't check permissions", slog.String("err", err.Error()))
-		return nil, fmt.Errorf("%s: %w", op, ErrInternal)
+		return &lpmodels.SharingChannelResp{
+			Success: false,
+		}, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
 	}
 	if !p {
 		log.Info("permissions denied", slog.String("user_id", s.UserID))
-		return nil, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
+		return &lpmodels.SharingChannelResp{
+			Success: false,
+		}, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
 	}
 
 	// Start sharing
@@ -384,10 +411,14 @@ func (lp *LpService) ShareChannelToGroup(ctx context.Context, s *lpmodels.Sharin
 		switch {
 		case errors.Is(err, lpgrpc.ErrInvalidCredentials):
 			log.Error("bad request", slog.String("err", err.Error()))
-			return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+			return &lpmodels.SharingChannelResp{
+				Success: false,
+			}, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 		default:
 			log.Error("failed to share channel", slog.String("err", err.Error()))
-			return nil, fmt.Errorf("%s: %w", op, ErrInternal)
+			return &lpmodels.SharingChannelResp{
+				Success: false,
+			}, fmt.Errorf("%s: %w", op, ErrInternal)
 		}
 	}
 	span.AddEvent("completed_deleting_channel")

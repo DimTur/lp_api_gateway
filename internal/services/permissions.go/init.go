@@ -14,6 +14,10 @@ type ChannelPermissionsProvider interface {
 	LerningGroupsShareWithChannel(ctx context.Context, channelID *lpmodels.LerningGroupsShareWithChannel) ([]string, error)
 }
 
+type PlanPermissionsProvider interface {
+	IsUserShareWithPlan(ctx context.Context, userPlan *IsUserShareWithPlan) (*lpmodels.IsPlanShareWith, error)
+}
+
 type LgPermissionsProvider interface {
 	UserIsGroupAdminIn(ctx context.Context, user *ssomodels.UserIsGroupAdminIn) ([]string, error)
 	UserIsLearnerIn(ctx context.Context, user *ssomodels.UserIsLearnerIn) ([]string, error)
@@ -30,6 +34,7 @@ type PermissionsService struct {
 	log                        *slog.Logger
 	validator                  *validator.Validate
 	channelPermissionsProvider ChannelPermissionsProvider
+	planPermissionsProvider    PlanPermissionsProvider
 	lgPermissionsProvider      LgPermissionsProvider
 	redisPermissionsProvider   RedisPermissionsProvider
 }
@@ -38,6 +43,7 @@ func New(
 	log *slog.Logger,
 	validator *validator.Validate,
 	channelPermissionsProvider ChannelPermissionsProvider,
+	planPermissionsProvider PlanPermissionsProvider,
 	lgPermissionsProvider LgPermissionsProvider,
 	redisPermissionsProvider RedisPermissionsProvider,
 ) *PermissionsService {
@@ -45,6 +51,7 @@ func New(
 		log:                        log,
 		validator:                  validator,
 		channelPermissionsProvider: channelPermissionsProvider,
+		planPermissionsProvider:    planPermissionsProvider,
 		lgPermissionsProvider:      lgPermissionsProvider,
 		redisPermissionsProvider:   redisPermissionsProvider,
 	}

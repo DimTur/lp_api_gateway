@@ -20,6 +20,15 @@ type ChannelServiceProvider interface {
 	LerningGroupsShareWithChannel(ctx context.Context, channelID *lpmodels.LerningGroupsShareWithChannel) ([]string, error)
 }
 
+type PlanServiceProvider interface {
+	CreatePlan(ctx context.Context, plan *lpmodels.CreatePlan) (*lpmodels.CreatePlanResponse, error)
+	GetPlan(ctx context.Context, plan *lpmodels.GetPlan) (*lpmodels.GetPlanResponse, error)
+	GetPlans(ctx context.Context, inputParam *lpmodels.GetPlans) ([]lpmodels.GetPlanResponse, error)
+	UpdatePlan(ctx context.Context, updPlan *lpmodels.UpdatePlan) (*lpmodels.UpdatePlanResponse, error)
+	DeletePlan(ctx context.Context, delPlan *lpmodels.DelPlan) (*lpmodels.DelPlanResponse, error)
+	SharePlanWithUser(ctx context.Context, sharePlanWithUser *lpmodels.SharePlan) (*lpmodels.SharingPlanResp, error)
+}
+
 type LgServiceProvider interface {
 	UserIsLearnerIn(ctx context.Context, user *ssomodels.UserIsLearnerIn) ([]string, error)
 }
@@ -32,6 +41,7 @@ type LpService struct {
 	Log                 *slog.Logger
 	Validator           *validator.Validate
 	ChannelProvider     ChannelServiceProvider
+	PlanProvider        PlanServiceProvider
 	LgServiceProvider   LgServiceProvider
 	PermissionsProvider permissions.PermissionsService
 }
@@ -40,6 +50,7 @@ func New(
 	log *slog.Logger,
 	validator *validator.Validate,
 	channelProvider ChannelServiceProvider,
+	planProvider PlanServiceProvider,
 	lgServiceProvider LgServiceProvider,
 	permissionsProvider permissions.PermissionsService,
 ) *LpService {
@@ -47,6 +58,7 @@ func New(
 		Log:                 log,
 		Validator:           validator,
 		ChannelProvider:     channelProvider,
+		PlanProvider:        planProvider,
 		LgServiceProvider:   lgServiceProvider,
 		PermissionsProvider: permissionsProvider,
 	}

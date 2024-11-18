@@ -68,6 +68,9 @@ func (c *Client) LoginUser(ctx context.Context, logUser *ssomodels.LogIn) (*ssom
 		case codes.NotFound:
 			c.log.Error("user not found", slog.String("err", err.Error()))
 			return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+		case codes.InvalidArgument:
+			c.log.Error("invalid credentials", slog.String("err", err.Error()))
+			return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 		default:
 			c.log.Error("internal error", slog.String("err", err.Error()))
 			return nil, fmt.Errorf("%s: %w", op, ErrInternal)

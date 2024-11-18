@@ -248,8 +248,14 @@ func (c *Client) LerningGroupsShareWithChannel(ctx context.Context, channelID *l
 		ChannelId: channelID.ChannelID,
 	})
 	if err != nil {
-		c.log.Error("internal error", slog.String("err", err.Error()))
-		return nil, fmt.Errorf("%s: %w", op, ErrInternal)
+		switch status.Code(err) {
+		case codes.InvalidArgument:
+			c.log.Error("bad request", slog.String("err", err.Error()))
+			return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+		default:
+			c.log.Error("internal error", slog.String("err", err.Error()))
+			return nil, fmt.Errorf("%s: %w", op, ErrInternal)
+		}
 	}
 
 	return resp.LearningGroupIds, nil
