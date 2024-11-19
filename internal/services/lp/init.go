@@ -6,7 +6,7 @@ import (
 
 	lpmodels "github.com/DimTur/lp_api_gateway/internal/clients/lp/models"
 	ssomodels "github.com/DimTur/lp_api_gateway/internal/clients/sso/models.go"
-	"github.com/DimTur/lp_api_gateway/internal/services/permissions.go"
+	"github.com/DimTur/lp_api_gateway/internal/services/permissions"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -29,6 +29,14 @@ type PlanServiceProvider interface {
 	SharePlanWithUser(ctx context.Context, sharePlanWithUser *lpmodels.SharePlan) (*lpmodels.SharingPlanResp, error)
 }
 
+type LessonServiceProvider interface {
+	CreateLesson(ctx context.Context, lesson *lpmodels.CreateLesson) (*lpmodels.CreateLessonResponse, error)
+	GetLesson(ctx context.Context, lesson *lpmodels.GetLesson) (*lpmodels.GetLessonResponse, error)
+	GetLessons(ctx context.Context, inputParam *lpmodels.GetLessons) ([]lpmodels.GetLessonResponse, error)
+	UpdateLesson(ctx context.Context, updLesson *lpmodels.UpdateLesson) (*lpmodels.UpdateLessonResponse, error)
+	DeleteLesson(ctx context.Context, delLess *lpmodels.DeleteLesson) (*lpmodels.DeleteLessonResponse, error)
+}
+
 type LgServiceProvider interface {
 	UserIsLearnerIn(ctx context.Context, user *ssomodels.UserIsLearnerIn) ([]string, error)
 }
@@ -42,6 +50,7 @@ type LpService struct {
 	Validator           *validator.Validate
 	ChannelProvider     ChannelServiceProvider
 	PlanProvider        PlanServiceProvider
+	LessonProvider      LessonServiceProvider
 	LgServiceProvider   LgServiceProvider
 	PermissionsProvider permissions.PermissionsService
 }
@@ -51,6 +60,7 @@ func New(
 	validator *validator.Validate,
 	channelProvider ChannelServiceProvider,
 	planProvider PlanServiceProvider,
+	lessonProvider LessonServiceProvider,
 	lgServiceProvider LgServiceProvider,
 	permissionsProvider permissions.PermissionsService,
 ) *LpService {
@@ -59,6 +69,7 @@ func New(
 		Validator:           validator,
 		ChannelProvider:     channelProvider,
 		PlanProvider:        planProvider,
+		LessonProvider:      lessonProvider,
 		LgServiceProvider:   lgServiceProvider,
 		PermissionsProvider: permissionsProvider,
 	}

@@ -192,7 +192,7 @@
                         }
                     },
                     "404": {
-                        "description": "Channel not found",
+                        "description": "Plan not found",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -258,7 +258,7 @@
                         }
                     },
                     "404": {
-                        "description": "Channel not found",
+                        "description": "Plan not found",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -304,7 +304,7 @@
                         "required": true
                     },
                     {
-                        "description": "Plan getting parameters",
+                        "description": "Plan updating parameters",
                         "name": "planshandler.UpdatePlanRequest",
                         "in": "body",
                         "required": true,
@@ -333,7 +333,392 @@
                         }
                     },
                     "404": {
-                        "description": "Channels not found",
+                        "description": "Plan not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/channels/{channel_id}/plans/{plan_id}/lessons": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "This endpoint returns lessons information relevant for user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "lessons"
+                ],
+                "summary": "Get all lessons relevant for user",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of the channel",
+                        "name": "channel_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the plan",
+                        "name": "plan_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/lessonshandler.GetLessonsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data in the request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "This endpoint allows users to create a new lesson with the specified data.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "lessons"
+                ],
+                "summary": "Create a new lesson",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of the channel",
+                        "name": "channel_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the plan",
+                        "name": "plan_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Lesson creation parameters",
+                        "name": "lessonshandler.CreateLessonRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/lessonshandler.CreateLessonRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/lessonshandler.CreateLessonResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data in the request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "This endpoint returns lesson information by ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "lessons"
+                ],
+                "summary": "Get lesson information",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of the channel",
+                        "name": "channel_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the plan",
+                        "name": "plan_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the lesson",
+                        "name": "lesson_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/lessonshandler.GetLessonResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data in the request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Lesson not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "This endpoint allows lesson id and delete it.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "lessons"
+                ],
+                "summary": "Delete lesson by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of the channel",
+                        "name": "channel_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the plan",
+                        "name": "plan_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the lesson",
+                        "name": "lesson_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/lessonshandler.DeleteLessonResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data in the request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Lesson not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "This endpoint allows lesson id and update it.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "lessons"
+                ],
+                "summary": "Update lesson by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of the channel",
+                        "name": "channel_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the plan",
+                        "name": "plan_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the lesson",
+                        "name": "lesson_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Lesson updating parameters",
+                        "name": "lessonshandler.UpdateLessonRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/lessonshandler.UpdateLessonRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/lessonshandler.UpdateLessonResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data in the request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Lesson not found",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -1676,6 +2061,104 @@
                 }
             }
         },
+        "lessonshandler.CreateLessonRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "lessonshandler.CreateLessonResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "lesson_id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "lessonshandler.DeleteLessonResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "lessonshandler.GetLessonResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "lesson": {
+                    "$ref": "#/definitions/lpmodels.GetLessonResponse"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "lessonshandler.GetLessonsResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "lessons": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/lpmodels.GetLessonResponse"
+                    }
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "lessonshandler.UpdateLessonRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "lessonshandler.UpdateLessonResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "updateLessonResponse": {
+                    "$ref": "#/definitions/lpmodels.UpdateLessonResponse"
+                }
+            }
+        },
         "lpmodels.Channel": {
             "type": "object",
             "properties": {
@@ -1731,6 +2214,32 @@
                     "items": {
                         "$ref": "#/definitions/lpmodels.Plan"
                     }
+                }
+            }
+        },
+        "lpmodels.GetLessonResponse": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "createdBy": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "modified": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },
@@ -1794,6 +2303,17 @@
                     "type": "string"
                 },
                 "public": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "lpmodels.UpdateLessonResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "success": {
                     "type": "boolean"
                 }
             }

@@ -7,14 +7,13 @@ import (
 	"log/slog"
 
 	lpmodels "github.com/DimTur/lp_api_gateway/internal/clients/lp/models"
-	"github.com/DimTur/lp_api_gateway/internal/services/permissions.go"
+	"github.com/DimTur/lp_api_gateway/internal/services/permissions"
 	lpv1 "github.com/DimTur/lp_protos/gen/go/lp"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 var (
-	ErrPlanExitsts  = errors.New("plan already exists")
 	ErrPlanNotFound = errors.New("plan not found")
 )
 

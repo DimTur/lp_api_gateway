@@ -8,16 +8,13 @@ import (
 
 	lpgrpc "github.com/DimTur/lp_api_gateway/internal/clients/lp/grpc"
 	lpmodels "github.com/DimTur/lp_api_gateway/internal/clients/lp/models"
-	ssomodels "github.com/DimTur/lp_api_gateway/internal/clients/sso/models.go"
-	"github.com/DimTur/lp_api_gateway/internal/services/permissions.go"
+	"github.com/DimTur/lp_api_gateway/internal/services/permissions"
 	"github.com/DimTur/lp_api_gateway/pkg/tracer"
 	"go.opentelemetry.io/otel/attribute"
 )
 
 var (
-	ErrInvalidPlanID = errors.New("invalid plan id")
-	ErrPlanExitsts   = errors.New("plan already exists")
-	ErrPlanNotFound  = errors.New("plan not found")
+	ErrPlanNotFound = errors.New("plan not found")
 )
 
 func (lp *LpService) CreatePlan(ctx context.Context, plan *lpmodels.CreatePlan) (*lpmodels.CreatePlanResponse, error) {
@@ -49,9 +46,9 @@ func (lp *LpService) CreatePlan(ctx context.Context, plan *lpmodels.CreatePlan) 
 
 	// Start check permissions
 	span.AddEvent("checking_permissons_for_user")
-	p, err := lp.PermissionsProvider.IsGroupAdmin(ctx, &ssomodels.IsGroupAdmin{
-		UserID: plan.CreatedBy,
-		LgID:   plan.LearningGroupId,
+	p, err := lp.PermissionsProvider.CheckCreatorOrAdminAndSharePermissions(ctx, &permissions.CheckPerm{
+		UserID:    plan.CreatedBy,
+		ChannelID: plan.ChannelID,
 	})
 	if err != nil {
 		log.Error("can't check permissions", slog.String("err", err.Error()))

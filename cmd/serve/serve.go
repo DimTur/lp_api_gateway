@@ -12,7 +12,7 @@ import (
 	"github.com/DimTur/lp_api_gateway/internal/config"
 	"github.com/DimTur/lp_api_gateway/internal/lib/api/validation"
 	lpservice "github.com/DimTur/lp_api_gateway/internal/services/lp"
-	"github.com/DimTur/lp_api_gateway/internal/services/permissions.go"
+	"github.com/DimTur/lp_api_gateway/internal/services/permissions"
 	ssoservice "github.com/DimTur/lp_api_gateway/internal/services/sso"
 	"github.com/DimTur/lp_api_gateway/internal/services/storage/redis"
 	"github.com/DimTur/lp_api_gateway/pkg/meter"
@@ -85,7 +85,7 @@ func NewServeCmd() *cobra.Command {
 
 			permService := permissions.New(log, validate, lpClient, lpClient, ssoClient, redisPerm)
 			ssoService := ssoservice.New(log, validate, ssoClient, ssoClient)
-			lpService := lpservice.New(log, validate, lpClient, lpClient, ssoClient, *permService)
+			lpService := lpservice.New(log, validate, lpClient, lpClient, lpClient, ssoClient, *permService)
 
 			application, err := app.NewApp(
 				cfg.HTTPServer.Address,

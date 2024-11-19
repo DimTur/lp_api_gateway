@@ -1,4 +1,4 @@
-package planshandler
+package lessonshandler
 
 import (
 	"context"
@@ -18,36 +18,36 @@ import (
 
 var (
 	ErrInvalidCredentials = errors.New("invalid credentials")
-	ErrPlanNotFound       = errors.New("plan not found")
+	ErrLessonNotFound     = errors.New("lesson not found")
 )
 
 type LPService interface {
-	CreatePlan(ctx context.Context, plan *lpmodels.CreatePlan) (*lpmodels.CreatePlanResponse, error)
-	GetPlan(ctx context.Context, plan *lpmodels.GetPlan) (*lpmodels.GetPlanResponse, error)
-	GetPlans(ctx context.Context, inputParam *lpmodels.GetPlans) ([]lpmodels.GetPlanResponse, error)
-	UpdatePlan(ctx context.Context, updPlan *lpmodels.UpdatePlan) (*lpmodels.UpdatePlanResponse, error)
-	DeletePlan(ctx context.Context, delPlan *lpmodels.DelPlan) (*lpmodels.DelPlanResponse, error)
-	SharePlanWithUser(ctx context.Context, sharePlanWithUser *lpmodels.SharePlan) (*lpmodels.SharingPlanResp, error)
+	CreateLesson(ctx context.Context, lesson *lpmodels.CreateLesson) (*lpmodels.CreateLessonResponse, error)
+	GetLesson(ctx context.Context, lesson *lpmodels.GetLesson) (*lpmodels.GetLessonResponse, error)
+	GetLessons(ctx context.Context, inputParam *lpmodels.GetLessons) ([]lpmodels.GetLessonResponse, error)
+	UpdateLesson(ctx context.Context, updLesson *lpmodels.UpdateLesson) (*lpmodels.UpdateLessonResponse, error)
+	DeleteLesson(ctx context.Context, delLess *lpmodels.DeleteLesson) (*lpmodels.DeleteLessonResponse, error)
 }
 
-// CreatePlan godoc
-// @Summary      Create a new plan
-// @Description  This endpoint allows users to create a new plan with the specified data.
-// @Tags         plans
+// CreateLesson godoc
+// @Summary      Create a new lesson
+// @Description  This endpoint allows users to create a new lesson with the specified data.
+// @Tags         lessons
 // @Accept       json
 // @Produce      json
-// @Param        id path int true "ID of the channel"
-// @Param        planshandler.CreatePlanRequest body planshandler.CreatePlanRequest true "Plan creation parameters"
-// @Success      201 {object} planshandler.CreatePlanResponse
+// @Param        channel_id path int true "ID of the channel"
+// @Param        plan_id path int true "ID of the plan"
+// @Param        lessonshandler.CreateLessonRequest body lessonshandler.CreateLessonRequest true "Lesson creation parameters"
+// @Success      201 {object} lessonshandler.CreateLessonResponse
 // @Failure      400 {object} response.Response "Invalid data in the request"
 // @Failure      401 {object} response.Response "Unauthorized"
 // @Failure      409 {object} response.Response "Conflict"
 // @Failure      500 {object} response.Response "Server error"
-// @Router       /channels/{id}/plans [post]
+// @Router       /channels/{channel_id}/plans/{plan_id}/lessons [post]
 // @Security ApiKeyAuth
-func CreatePlan(log *slog.Logger, val *validator.Validate, lpService LPService) http.HandlerFunc {
+func CreateLesson(log *slog.Logger, val *validator.Validate, lpService LPService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		const op = "handlers.learning_platform.plans.CreatePlan"
+		const op = "handlers.learning_platform.lessons.CreateLesson"
 
 		log = log.With(
 			slog.String("op", op),
@@ -64,25 +64,31 @@ func CreatePlan(log *slog.Logger, val *validator.Validate, lpService LPService) 
 			return
 		}
 
-		channelID, err := utils.GetURLParamInt64(r, "id")
+		channelID, err := utils.GetURLParamInt64(r, "channel_id")
+		if err != nil {
+			log.Error(err.Error())
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		planID, err := utils.GetURLParamInt64(r, "plan_id")
 		if err != nil {
 			log.Error(err.Error())
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		req, err := utils.DecodeRequestBody[CreatePlanRequest](r, log)
+		req, err := utils.DecodeRequestBody[CreateLessonRequest](r, log)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		resp, err := lpService.CreatePlan(r.Context(), &lpmodels.CreatePlan{
-			Name:            req.Name,
-			Description:     req.Description,
-			CreatedBy:       uID,
-			ChannelID:       channelID,
-			LearningGroupId: req.LearningGroupId,
+		resp, err := lpService.CreateLesson(r.Context(), &lpmodels.CreateLesson{
+			Name:        req.Name,
+			Description: req.Description,
+			CreatedBy:   uID,
+			PlanID:      planID,
+			ChannelID:   channelID,
 		})
 		if err != nil {
 			switch {
@@ -105,32 +111,33 @@ func CreatePlan(log *slog.Logger, val *validator.Validate, lpService LPService) 
 
 		log.Info("channel created", slog.Int64("id", resp.ID))
 
-		render.JSON(w, r, CreatePlanResponse{
+		render.JSON(w, r, CreateLessonResponse{
 			Response: response.OK(),
-			PlanID:   resp.ID,
+			LessonID: resp.ID,
 		})
 		w.WriteHeader(http.StatusCreated)
 	}
 }
 
-// GetPlan godoc
-// @Summary      Get plan information
-// @Description  This endpoint returns plan information by ID.
-// @Tags         plans
+// GetLesson godoc
+// @Summary      Get lesson information
+// @Description  This endpoint returns lesson information by ID.
+// @Tags         lessons
 // @Accept       json
 // @Produce      json
 // @Param        channel_id path int true "ID of the channel"
 // @Param        plan_id path int true "ID of the plan"
-// @Success      200 {object} planshandler.GetPlanResponse
+// @Param        lesson_id path int true "ID of the lesson"
+// @Success      200 {object} lessonshandler.GetLessonResponse
 // @Failure      400 {object} response.Response "Invalid data in the request"
 // @Failure      401 {object} response.Response "Unauthorized"
-// @Failure      404 {object} response.Response "Plan not found"
+// @Failure      404 {object} response.Response "Lesson not found"
 // @Failure      500 {object} response.Response "Server error"
-// @Router       /channels/{channel_id}/plans/{plan_id} [get]
+// @Router       /channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id} [get]
 // @Security ApiKeyAuth
-func GetPlan(log *slog.Logger, val *validator.Validate, lpService LPService) http.HandlerFunc {
+func GetLesson(log *slog.Logger, val *validator.Validate, lpService LPService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		const op = "handlers.learning_platform.plans.GetPlan"
+		const op = "handlers.learning_platform.lessons.GetLesson"
 
 		log = log.With(
 			slog.String("op", op),
@@ -159,9 +166,16 @@ func GetPlan(log *slog.Logger, val *validator.Validate, lpService LPService) htt
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+		lessonID, err := utils.GetURLParamInt64(r, "lesson_id")
+		if err != nil {
+			log.Error(err.Error())
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 
-		plan, err := lpService.GetPlan(r.Context(), &lpmodels.GetPlan{
+		lesson, err := lpService.GetLesson(r.Context(), &lpmodels.GetLesson{
 			UserID:    uID,
+			LessonID:  lessonID,
 			ChannelID: channelID,
 			PlanID:    planID,
 		})
@@ -172,48 +186,49 @@ func GetPlan(log *slog.Logger, val *validator.Validate, lpService LPService) htt
 				w.WriteHeader(http.StatusBadRequest)
 				render.JSON(w, r, response.Error("permissions denied"))
 			case errors.Is(err, lpservice.ErrInvalidCredentials):
-				log.Error("bad request", slog.Int64("plan_id", planID))
+				log.Error("bad request", slog.Int64("lesson_id", lessonID))
 				w.WriteHeader(http.StatusBadRequest)
 				render.JSON(w, r, response.Error("bad request"))
-			case errors.Is(err, lpservice.ErrPlanNotFound):
-				log.Error("plan not found", slog.Int64("plan_id", planID))
+			case errors.Is(err, lpservice.ErrLessonNotFound):
+				log.Error("lesson not found", slog.Int64("lesson_id", lessonID))
 				w.WriteHeader(http.StatusNotFound)
-				render.JSON(w, r, response.Error("plan not found"))
+				render.JSON(w, r, response.Error("lesson not found"))
 			default:
-				log.Error("failed to get plan", slog.String("err", err.Error()))
+				log.Error("failed to get lesson", slog.String("err", err.Error()))
 				w.WriteHeader(http.StatusInternalServerError)
 				render.JSON(w, r, response.Error("Internal Server Error"))
 			}
 		}
 
-		log.Info("plan retrieved", slog.Int64("plan_id", planID))
+		log.Info("lesson retrieved", slog.Int64("lesson_id", lessonID))
 
-		render.JSON(w, r, GetPlanResponse{
+		render.JSON(w, r, GetLessonResponse{
 			Response: response.OK(),
-			Plan:     *plan,
+			Lesson:   *lesson,
 		})
 	}
 }
 
-// GetPlans godoc
-// @Summary      Get all plans relevant for user
-// @Description  This endpoint returns plans information relevant for user.
-// @Tags         plans
+// GetLessons godoc
+// @Summary      Get all lessons relevant for user
+// @Description  This endpoint returns lessons information relevant for user.
+// @Tags         lessons
 // @Accept       json
 // @Produce      json
-// @Param        id path int true "ID of the channel"
+// @Param        channel_id path int true "ID of the channel"
+// @Param        plan_id path int true "ID of the plan"
 // @Param 		 limit query int false "Limit"
 // @Param 		 offset query int false "Offset"
-// @Success      201 {object} planshandler.GetPlansResponse
+// @Success      201 {object} lessonshandler.GetLessonsResponse
 // @Failure      400 {object} response.Response "Invalid data in the request"
 // @Failure      401 {object} response.Response "Unauthorized"
 // @Failure      409 {object} response.Response "Conflict"
 // @Failure      500 {object} response.Response "Server error"
-// @Router       /channels/{id}/plans [get]
+// @Router       /channels/{channel_id}/plans/{plan_id}/lessons [get]
 // @Security ApiKeyAuth
-func GetPlans(log *slog.Logger, val *validator.Validate, lpService LPService) http.HandlerFunc {
+func GetLessons(log *slog.Logger, val *validator.Validate, lpService LPService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		const op = "handlers.learning_platform.plans.GetPlans"
+		const op = "handlers.learning_platform.lessons.GetLessons"
 
 		log = log.With(
 			slog.String("op", op),
@@ -230,7 +245,13 @@ func GetPlans(log *slog.Logger, val *validator.Validate, lpService LPService) ht
 			return
 		}
 
-		channelID, err := utils.GetURLParamInt64(r, "id")
+		channelID, err := utils.GetURLParamInt64(r, "channel_id")
+		if err != nil {
+			log.Error(err.Error())
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		planID, err := utils.GetURLParamInt64(r, "plan_id")
 		if err != nil {
 			log.Error(err.Error())
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -247,8 +268,9 @@ func GetPlans(log *slog.Logger, val *validator.Validate, lpService LPService) ht
 			offset = 0
 		}
 
-		plans, err := lpService.GetPlans(r.Context(), &lpmodels.GetPlans{
+		lessons, err := lpService.GetLessons(r.Context(), &lpmodels.GetLessons{
 			UserID:    uID,
+			PlanID:    planID,
 			ChannelID: channelID,
 			Limit:     limit,
 			Offset:    offset,
@@ -259,45 +281,46 @@ func GetPlans(log *slog.Logger, val *validator.Validate, lpService LPService) ht
 				log.Error("permissions denied", slog.String("err", err.Error()))
 				w.WriteHeader(http.StatusBadRequest)
 				render.JSON(w, r, response.Error("permissions denied"))
-			case errors.Is(err, lpservice.ErrPlanNotFound):
-				log.Error("plan not found", slog.String("err", err.Error()))
+			case errors.Is(err, lpservice.ErrLessonNotFound):
+				log.Error("lessons not found", slog.String("err", err.Error()))
 				w.WriteHeader(http.StatusNotFound)
-				render.JSON(w, r, response.Error("plan not found"))
+				render.JSON(w, r, response.Error("lessons not found"))
 			default:
-				log.Error("failed to get plan", slog.String("err", err.Error()))
+				log.Error("failed to get lessons", slog.String("err", err.Error()))
 				w.WriteHeader(http.StatusInternalServerError)
 				render.JSON(w, r, response.Error("Internal Server Error"))
 			}
 		}
 
-		log.Info("plans retrieved")
+		log.Info("lessons retrieved")
 
-		render.JSON(w, r, GetPlansResponse{
+		render.JSON(w, r, GetLessonsResponse{
 			Response: response.OK(),
-			Plans:    plans,
+			Lessons:  lessons,
 		})
 	}
 }
 
-// UpdatePlan godoc
-// @Summary      Update channel by id
-// @Description  This endpoint allows plan id and update it.
-// @Tags         plans
+// UpdateLesson godoc
+// @Summary      Update lesson by id
+// @Description  This endpoint allows lesson id and update it.
+// @Tags         lessons
 // @Accept       json
 // @Produce      json
 // @Param        channel_id path int true "ID of the channel"
 // @Param        plan_id path int true "ID of the plan"
-// @Param        planshandler.UpdatePlanRequest body planshandler.UpdatePlanRequest true "Plan updating parameters"
-// @Success      200 {object} planshandler.UpdatePlanResponse
+// @Param        lesson_id path int true "ID of the lesson"
+// @Param        lessonshandler.UpdateLessonRequest body lessonshandler.UpdateLessonRequest true "Lesson updating parameters"
+// @Success      200 {object} lessonshandler.UpdateLessonResponse
 // @Failure      400 {object} response.Response "Invalid data in the request"
 // @Failure      401 {object} response.Response "Unauthorized"
-// @Failure      404 {object} response.Response "Plan not found"
+// @Failure      404 {object} response.Response "Lesson not found"
 // @Failure      500 {object} response.Response "Server error"
-// @Router       /channels/{channel_id}/plans/{plan_id} [patch]
+// @Router       /channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id} [patch]
 // @Security ApiKeyAuth
-func UpdatePlan(log *slog.Logger, val *validator.Validate, lpService LPService) http.HandlerFunc {
+func UpdateLesson(log *slog.Logger, val *validator.Validate, lpService LPService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		const op = "handlers.learning_platform.plans.UpdatePlan"
+		const op = "handlers.learning_platform.lessons.UpdateLesson"
 
 		log = log.With(
 			slog.String("op", op),
@@ -326,21 +349,26 @@ func UpdatePlan(log *slog.Logger, val *validator.Validate, lpService LPService) 
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+		lessonID, err := utils.GetURLParamInt64(r, "lesson_id")
+		if err != nil {
+			log.Error(err.Error())
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 
-		req, err := utils.DecodeRequestBody[UpdatePlanRequest](r, log)
+		req, err := utils.DecodeRequestBody[UpdateLessonRequest](r, log)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		resp, err := lpService.UpdatePlan(r.Context(), &lpmodels.UpdatePlan{
+		resp, err := lpService.UpdateLesson(r.Context(), &lpmodels.UpdateLesson{
 			ChannelID:      channelID,
 			PlanID:         planID,
+			LessonID:       lessonID,
 			Name:           req.Name,
 			Description:    req.Description,
 			LastModifiedBy: uID,
-			IsPublished:    req.IsPublished,
-			Public:         req.Public,
 		})
 		if err != nil {
 			switch {
@@ -349,47 +377,48 @@ func UpdatePlan(log *slog.Logger, val *validator.Validate, lpService LPService) 
 				w.WriteHeader(http.StatusBadRequest)
 				render.JSON(w, r, response.Error("permissions denied"))
 			case errors.Is(err, lpservice.ErrInvalidCredentials):
-				log.Error("bad request", slog.Int64("plan_id", planID))
+				log.Error("bad request", slog.Int64("lesson_id", lessonID))
 				w.WriteHeader(http.StatusBadRequest)
 				render.JSON(w, r, response.Error("bad request"))
-			case errors.Is(err, lpservice.ErrPlanNotFound):
-				log.Error("plan not found", slog.Int64("plan_id", planID))
+			case errors.Is(err, lpservice.ErrLessonNotFound):
+				log.Error("lesson not found", slog.Int64("lesson_id", lessonID))
 				w.WriteHeader(http.StatusNotFound)
-				render.JSON(w, r, response.Error("plan not found"))
+				render.JSON(w, r, response.Error("lesson not found"))
 			default:
-				log.Error("failed to update plan", slog.String("err", err.Error()))
+				log.Error("failed to update lesson", slog.String("err", err.Error()))
 				w.WriteHeader(http.StatusInternalServerError)
 				render.JSON(w, r, response.Error("Internal Server Error"))
 			}
 		}
 
-		log.Info("plan updated", slog.Int64("plan_id", planID))
+		log.Info("lesson updated", slog.Int64("lesson_id", lessonID))
 
-		render.JSON(w, r, UpdatePlanResponse{
-			Response:           response.OK(),
-			UpdatePlanResponse: *resp,
+		render.JSON(w, r, UpdateLessonResponse{
+			Response:             response.OK(),
+			UpdateLessonResponse: *resp,
 		})
 	}
 }
 
-// DeletePlan godoc
-// @Summary      Delete plan by id
-// @Description  This endpoint allows plan id and delete it.
-// @Tags         plans
+// DeleteLesson godoc
+// @Summary      Delete lesson by id
+// @Description  This endpoint allows lesson id and delete it.
+// @Tags         lessons
 // @Accept       json
 // @Produce      json
 // @Param        channel_id path int true "ID of the channel"
 // @Param        plan_id path int true "ID of the plan"
-// @Success      200 {object} planshandler.DeletePlanResponse
+// @Param        lesson_id path int true "ID of the lesson"
+// @Success      200 {object} lessonshandler.DeleteLessonResponse
 // @Failure      400 {object} response.Response "Invalid data in the request"
 // @Failure      401 {object} response.Response "Unauthorized"
-// @Failure      404 {object} response.Response "Plan not found"
+// @Failure      404 {object} response.Response "Lesson not found"
 // @Failure      500 {object} response.Response "Server error"
-// @Router       /channels/{channel_id}/plans/{plan_id} [delete]
+// @Router       /channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id} [delete]
 // @Security ApiKeyAuth
-func DeletePlan(log *slog.Logger, val *validator.Validate, lpService LPService) http.HandlerFunc {
+func DeleteLesson(log *slog.Logger, val *validator.Validate, lpService LPService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		const op = "handlers.learning_platform.plans.DeletePlan"
+		const op = "handlers.learning_platform.lessons.DeleteLesson"
 
 		log = log.With(
 			slog.String("op", op),
@@ -418,9 +447,16 @@ func DeletePlan(log *slog.Logger, val *validator.Validate, lpService LPService) 
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+		lessonID, err := utils.GetURLParamInt64(r, "lesson_id")
+		if err != nil {
+			log.Error(err.Error())
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 
-		del, err := lpService.DeletePlan(r.Context(), &lpmodels.DelPlan{
+		del, err := lpService.DeleteLesson(r.Context(), &lpmodels.DeleteLesson{
 			UserID:    uID,
+			LessonID:  lessonID,
 			ChannelID: channelID,
 			PlanID:    planID,
 		})
@@ -430,111 +466,26 @@ func DeletePlan(log *slog.Logger, val *validator.Validate, lpService LPService) 
 				log.Error("permissions denied", slog.String("err", err.Error()))
 				w.WriteHeader(http.StatusBadRequest)
 				render.JSON(w, r, response.Error("permissions denied"))
-			case errors.Is(err, lpservice.ErrPlanNotFound):
-				log.Error("plan not found", slog.Int64("plan_id", planID))
+			case errors.Is(err, lpservice.ErrLessonNotFound):
+				log.Error("lesson not found", slog.Int64("lesson_id", lessonID))
 				w.WriteHeader(http.StatusNotFound)
-				render.JSON(w, r, response.Error("plan not found"))
+				render.JSON(w, r, response.Error("lesson not found"))
 			case errors.Is(err, lpservice.ErrInvalidCredentials):
-				log.Error("bad request", slog.Int64("plan_id", planID))
+				log.Error("bad request", slog.Int64("lesson_id", lessonID))
 				w.WriteHeader(http.StatusBadRequest)
 				render.JSON(w, r, response.Error("bad request"))
 			default:
-				log.Error("failed to delete plan", slog.String("err", err.Error()))
+				log.Error("failed to delete lesson", slog.String("err", err.Error()))
 				w.WriteHeader(http.StatusInternalServerError)
 				render.JSON(w, r, response.Error("Internal Server Error"))
 			}
 		}
 
-		log.Info("plan deleted", slog.Int64("plan_id", planID))
+		log.Info("lesson deleted", slog.Int64("lesson_id", lessonID))
 
-		render.JSON(w, r, DeletePlanResponse{
+		render.JSON(w, r, DeleteLessonResponse{
 			Response: response.OK(),
 			Success:  del.Success,
-		})
-	}
-}
-
-// SharePlan godoc
-// @Summary      Share plan by id
-// @Description  This endpoint allows plan id and user ids and share with.
-// @Tags         plans
-// @Accept       json
-// @Produce      json
-// @Param        planshandler.SharePlanRequest body planshandler.SharePlanRequest true "Plan shering parameters"
-// @Param        channel_id path int true "ID of the channel"
-// @Param        plan_id path int true "ID of the plan"
-// @Success      200 {object} planshandler.SharePlanResponse
-// @Failure      400 {object} response.Response "Invalid data in the request"
-// @Failure      401 {object} response.Response "Unauthorized"
-// @Failure      404 {object} response.Response "Channels not found"
-// @Failure      500 {object} response.Response "Server error"
-// @Router       /channels/{channel_id}/plans/{plan_id}/share [post]
-// @Security ApiKeyAuth
-func SharePlan(log *slog.Logger, val *validator.Validate, lpService LPService) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		const op = "handlers.learning_platform.plans.SharePlan"
-
-		log = log.With(
-			slog.String("op", op),
-			slog.String("request_id", middleware.GetReqID(r.Context())),
-		)
-
-		meter.AllReqCount.Add(r.Context(), 1)
-		meter.CreateChannelReqCount.Add(r.Context(), 1)
-
-		uID, err := utils.GetHeaderID(r, "X-User-ID")
-		if err != nil {
-			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
-		}
-
-		channelID, err := utils.GetURLParamInt64(r, "channel_id")
-		if err != nil {
-			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-		planID, err := utils.GetURLParamInt64(r, "plan_id")
-		if err != nil {
-			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		req, err := utils.DecodeRequestBody[SharePlanRequest](r, log)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		resp, err := lpService.SharePlanWithUser(r.Context(), &lpmodels.SharePlan{
-			UserID:    uID,
-			ChannelID: channelID,
-			PlanID:    planID,
-			UsersIDs:  req.UserIDs,
-		})
-		if err != nil {
-			switch {
-			case errors.Is(err, lpservice.ErrPermissionDenied):
-				log.Error("permissions denied", slog.String("err", err.Error()))
-				w.WriteHeader(http.StatusBadRequest)
-				render.JSON(w, r, response.Error("permissions denied"))
-			case errors.Is(err, lpservice.ErrInvalidCredentials):
-				log.Error("bad request", slog.String("err", err.Error()))
-				w.WriteHeader(http.StatusBadRequest)
-				render.JSON(w, r, response.Error("bad request"))
-			default:
-				log.Error("failed to share plan", slog.String("err", err.Error()))
-				w.WriteHeader(http.StatusInternalServerError)
-				render.JSON(w, r, response.Error("Internal Server Error"))
-			}
-		}
-		log.Info("plan shared", slog.Int64("plan_id", planID))
-
-		render.JSON(w, r, SharePlanResponse{
-			Response: response.OK(),
-			Success:  resp.Success,
 		})
 	}
 }

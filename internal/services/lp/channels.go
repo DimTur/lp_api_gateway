@@ -9,7 +9,7 @@ import (
 	lpgrpc "github.com/DimTur/lp_api_gateway/internal/clients/lp/grpc"
 	lpmodels "github.com/DimTur/lp_api_gateway/internal/clients/lp/models"
 	ssomodels "github.com/DimTur/lp_api_gateway/internal/clients/sso/models.go"
-	"github.com/DimTur/lp_api_gateway/internal/services/permissions.go"
+	"github.com/DimTur/lp_api_gateway/internal/services/permissions"
 	"github.com/DimTur/lp_api_gateway/pkg/tracer"
 	"go.opentelemetry.io/otel/attribute"
 )

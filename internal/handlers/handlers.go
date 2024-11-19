@@ -6,6 +6,7 @@ import (
 	"time"
 
 	channelshandler "github.com/DimTur/lp_api_gateway/internal/handlers/learning_platform/channels"
+	lessonshandler "github.com/DimTur/lp_api_gateway/internal/handlers/learning_platform/lessons"
 	planshandler "github.com/DimTur/lp_api_gateway/internal/handlers/learning_platform/plans"
 	authmiddleware "github.com/DimTur/lp_api_gateway/internal/handlers/middleware/auth"
 	authhandler "github.com/DimTur/lp_api_gateway/internal/handlers/sso/auth"
@@ -122,6 +123,13 @@ func (c *ChiRouterConfigurator) ConfigureRouter() http.Handler {
 		r.Patch("/channels/{channel_id}/plans/{plan_id}", planshandler.UpdatePlan(c.Logger, c.validator, &c.LpService))
 		r.Delete("/channels/{channel_id}/plans/{plan_id}", planshandler.DeletePlan(c.Logger, c.validator, &c.LpService))
 		r.Post("/channels/{channel_id}/plans/{plan_id}/share", planshandler.SharePlan(c.Logger, c.validator, &c.LpService))
+
+		// Lessons
+		r.Post("/channels/{channel_id}/plans/{plan_id}/lessons", lessonshandler.CreateLesson(c.Logger, c.validator, &c.LpService))
+		r.Get("/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}", lessonshandler.GetLesson(c.Logger, c.validator, &c.LpService))
+		r.Get("/channels/{channel_id}/plans/{plan_id}/lessons", lessonshandler.GetLessons(c.Logger, c.validator, &c.LpService))
+		r.Patch("/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}", lessonshandler.UpdateLesson(c.Logger, c.validator, &c.LpService))
+		r.Delete("/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}", lessonshandler.DeleteLesson(c.Logger, c.validator, &c.LpService))
 	})
 
 	return router

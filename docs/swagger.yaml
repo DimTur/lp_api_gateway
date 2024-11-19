@@ -204,6 +204,69 @@ definitions:
       name:
         type: string
     type: object
+  lessonshandler.CreateLessonRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  lessonshandler.CreateLessonResponse:
+    properties:
+      error:
+        type: string
+      lesson_id:
+        type: integer
+      status:
+        type: string
+    type: object
+  lessonshandler.DeleteLessonResponse:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+      success:
+        type: boolean
+    type: object
+  lessonshandler.GetLessonResponse:
+    properties:
+      error:
+        type: string
+      lesson:
+        $ref: '#/definitions/lpmodels.GetLessonResponse'
+      status:
+        type: string
+    type: object
+  lessonshandler.GetLessonsResponse:
+    properties:
+      error:
+        type: string
+      lessons:
+        items:
+          $ref: '#/definitions/lpmodels.GetLessonResponse'
+        type: array
+      status:
+        type: string
+    type: object
+  lessonshandler.UpdateLessonRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    type: object
+  lessonshandler.UpdateLessonResponse:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+      updateLessonResponse:
+        $ref: '#/definitions/lpmodels.UpdateLessonResponse'
+    type: object
   lpmodels.Channel:
     properties:
       createdAt:
@@ -241,6 +304,23 @@ definitions:
         items:
           $ref: '#/definitions/lpmodels.Plan'
         type: array
+    type: object
+  lpmodels.GetLessonResponse:
+    properties:
+      createdAt:
+        type: string
+      createdBy:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      lastModifiedBy:
+        type: string
+      modified:
+        type: string
+      name:
+        type: string
     type: object
   lpmodels.GetPlanResponse:
     properties:
@@ -282,6 +362,13 @@ definitions:
       name:
         type: string
       public:
+        type: boolean
+    type: object
+  lpmodels.UpdateLessonResponse:
+    properties:
+      id:
+        type: integer
+      success:
         type: boolean
     type: object
   lpmodels.UpdatePlanResponse:
@@ -607,7 +694,7 @@ paths:
           schema:
             $ref: '#/definitions/response.Response'
         "404":
-          description: Channel not found
+          description: Plan not found
           schema:
             $ref: '#/definitions/response.Response'
         "500":
@@ -650,7 +737,7 @@ paths:
           schema:
             $ref: '#/definitions/response.Response'
         "404":
-          description: Channel not found
+          description: Plan not found
           schema:
             $ref: '#/definitions/response.Response'
         "500":
@@ -677,7 +764,7 @@ paths:
         name: plan_id
         required: true
         type: integer
-      - description: Plan getting parameters
+      - description: Plan updating parameters
         in: body
         name: planshandler.UpdatePlanRequest
         required: true
@@ -699,7 +786,7 @@ paths:
           schema:
             $ref: '#/definitions/response.Response'
         "404":
-          description: Channels not found
+          description: Plan not found
           schema:
             $ref: '#/definitions/response.Response'
         "500":
@@ -711,6 +798,259 @@ paths:
       summary: Update channel by id
       tags:
       - plans
+  /channels/{channel_id}/plans/{plan_id}/lessons:
+    get:
+      consumes:
+      - application/json
+      description: This endpoint returns lessons information relevant for user.
+      parameters:
+      - description: ID of the channel
+        in: path
+        name: channel_id
+        required: true
+        type: integer
+      - description: ID of the plan
+        in: path
+        name: plan_id
+        required: true
+        type: integer
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/lessonshandler.GetLessonsResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get all lessons relevant for user
+      tags:
+      - lessons
+    post:
+      consumes:
+      - application/json
+      description: This endpoint allows users to create a new lesson with the specified
+        data.
+      parameters:
+      - description: ID of the channel
+        in: path
+        name: channel_id
+        required: true
+        type: integer
+      - description: ID of the plan
+        in: path
+        name: plan_id
+        required: true
+        type: integer
+      - description: Lesson creation parameters
+        in: body
+        name: lessonshandler.CreateLessonRequest
+        required: true
+        schema:
+          $ref: '#/definitions/lessonshandler.CreateLessonRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/lessonshandler.CreateLessonResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new lesson
+      tags:
+      - lessons
+  /channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}:
+    delete:
+      consumes:
+      - application/json
+      description: This endpoint allows lesson id and delete it.
+      parameters:
+      - description: ID of the channel
+        in: path
+        name: channel_id
+        required: true
+        type: integer
+      - description: ID of the plan
+        in: path
+        name: plan_id
+        required: true
+        type: integer
+      - description: ID of the lesson
+        in: path
+        name: lesson_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/lessonshandler.DeleteLessonResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Lesson not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete lesson by id
+      tags:
+      - lessons
+    get:
+      consumes:
+      - application/json
+      description: This endpoint returns lesson information by ID.
+      parameters:
+      - description: ID of the channel
+        in: path
+        name: channel_id
+        required: true
+        type: integer
+      - description: ID of the plan
+        in: path
+        name: plan_id
+        required: true
+        type: integer
+      - description: ID of the lesson
+        in: path
+        name: lesson_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/lessonshandler.GetLessonResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Lesson not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get lesson information
+      tags:
+      - lessons
+    patch:
+      consumes:
+      - application/json
+      description: This endpoint allows lesson id and update it.
+      parameters:
+      - description: ID of the channel
+        in: path
+        name: channel_id
+        required: true
+        type: integer
+      - description: ID of the plan
+        in: path
+        name: plan_id
+        required: true
+        type: integer
+      - description: ID of the lesson
+        in: path
+        name: lesson_id
+        required: true
+        type: integer
+      - description: Lesson updating parameters
+        in: body
+        name: lessonshandler.UpdateLessonRequest
+        required: true
+        schema:
+          $ref: '#/definitions/lessonshandler.UpdateLessonRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/lessonshandler.UpdateLessonResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Lesson not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update lesson by id
+      tags:
+      - lessons
   /channels/{channel_id}/plans/{plan_id}/share:
     post:
       consumes:
