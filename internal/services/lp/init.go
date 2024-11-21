@@ -37,6 +37,20 @@ type LessonServiceProvider interface {
 	DeleteLesson(ctx context.Context, delLess *lpmodels.DeleteLesson) (*lpmodels.DeleteLessonResponse, error)
 }
 
+type PageServiceProvider interface {
+	CreateImagePage(ctx context.Context, page *lpmodels.CreateImagePage) (*lpmodels.CreatePageResponse, error)
+	CreateVideoPage(ctx context.Context, page *lpmodels.CreateVideoPage) (*lpmodels.CreatePageResponse, error)
+	CreatePDFPage(ctx context.Context, page *lpmodels.CreatePDFPage) (*lpmodels.CreatePageResponse, error)
+	GetImagePage(ctx context.Context, page *lpmodels.GetPage) (*lpmodels.ImagePage, error)
+	GetVideoPage(ctx context.Context, page *lpmodels.GetPage) (*lpmodels.VideoPage, error)
+	GetPDFPage(ctx context.Context, page *lpmodels.GetPage) (*lpmodels.PDFPage, error)
+	GetPages(ctx context.Context, inputParams *lpmodels.GetPages) ([]lpmodels.BasePage, error)
+	UpdateImagePage(ctx context.Context, updIPage *lpmodels.UpdateImagePage) (*lpmodels.UpdatePageResponse, error)
+	UpdateVideoPage(ctx context.Context, updIPage *lpmodels.UpdateVideoPage) (*lpmodels.UpdatePageResponse, error)
+	UpdatePDFPage(ctx context.Context, updIPage *lpmodels.UpdatePDFPage) (*lpmodels.UpdatePageResponse, error)
+	DeletePage(ctx context.Context, delPage *lpmodels.DeletePage) (*lpmodels.DeletePageResponse, error)
+}
+
 type LgServiceProvider interface {
 	UserIsLearnerIn(ctx context.Context, user *ssomodels.UserIsLearnerIn) ([]string, error)
 }
@@ -51,6 +65,7 @@ type LpService struct {
 	ChannelProvider     ChannelServiceProvider
 	PlanProvider        PlanServiceProvider
 	LessonProvider      LessonServiceProvider
+	PageProvider        PageServiceProvider
 	LgServiceProvider   LgServiceProvider
 	PermissionsProvider permissions.PermissionsService
 }
@@ -61,6 +76,7 @@ func New(
 	channelProvider ChannelServiceProvider,
 	planProvider PlanServiceProvider,
 	lessonProvider LessonServiceProvider,
+	pageProvider PageServiceProvider,
 	lgServiceProvider LgServiceProvider,
 	permissionsProvider permissions.PermissionsService,
 ) *LpService {
@@ -70,6 +86,7 @@ func New(
 		ChannelProvider:     channelProvider,
 		PlanProvider:        planProvider,
 		LessonProvider:      lessonProvider,
+		PageProvider:        pageProvider,
 		LgServiceProvider:   lgServiceProvider,
 		PermissionsProvider: permissionsProvider,
 	}

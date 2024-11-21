@@ -60,27 +60,28 @@ func CreateLesson(log *slog.Logger, val *validator.Validate, lpService LPService
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 
 		channelID, err := utils.GetURLParamInt64(r, "channel_id")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 		planID, err := utils.GetURLParamInt64(r, "plan_id")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 
 		req, err := utils.DecodeRequestBody[CreateLessonRequest](r, log)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			log.Error(err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 
 		resp, err := lpService.CreateLesson(r.Context(), &lpmodels.CreateLesson{
@@ -97,19 +98,19 @@ func CreateLesson(log *slog.Logger, val *validator.Validate, lpService LPService
 				w.WriteHeader(http.StatusBadRequest)
 				render.JSON(w, r, response.Error("permissions denied"))
 			case errors.Is(err, lpservice.ErrInvalidCredentials):
-				log.Error("invalid credentials", slog.Any("plan", req.Name))
+				log.Error("invalid credentials", slog.Any("lesson", req.Name))
 				w.WriteHeader(http.StatusBadRequest)
 				render.JSON(w, r, response.Error("invalid credentinals"))
 				return
 			default:
-				log.Error("failed to create plan", slog.String("err", err.Error()))
+				log.Error("failed to create lesson", slog.String("err", err.Error()))
 				w.WriteHeader(http.StatusInternalServerError)
-				render.JSON(w, r, response.Error("failed to create plan"))
+				render.JSON(w, r, response.Error("failed to create lesson"))
 				return
 			}
 		}
 
-		log.Info("channel created", slog.Int64("id", resp.ID))
+		log.Info("lesson created", slog.Int64("id", resp.ID))
 
 		render.JSON(w, r, CreateLessonResponse{
 			Response: response.OK(),
@@ -150,27 +151,27 @@ func GetLesson(log *slog.Logger, val *validator.Validate, lpService LPService) h
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 
 		channelID, err := utils.GetURLParamInt64(r, "channel_id")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 		planID, err := utils.GetURLParamInt64(r, "plan_id")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 		lessonID, err := utils.GetURLParamInt64(r, "lesson_id")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 
 		lesson, err := lpService.GetLesson(r.Context(), &lpmodels.GetLesson{
@@ -241,21 +242,21 @@ func GetLessons(log *slog.Logger, val *validator.Validate, lpService LPService) 
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 
 		channelID, err := utils.GetURLParamInt64(r, "channel_id")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 		planID, err := utils.GetURLParamInt64(r, "plan_id")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 
 		limit, err := utils.GetURLParamInt64(r, "limit")
@@ -333,33 +334,34 @@ func UpdateLesson(log *slog.Logger, val *validator.Validate, lpService LPService
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 
 		channelID, err := utils.GetURLParamInt64(r, "channel_id")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 		planID, err := utils.GetURLParamInt64(r, "plan_id")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 		lessonID, err := utils.GetURLParamInt64(r, "lesson_id")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 
 		req, err := utils.DecodeRequestBody[UpdateLessonRequest](r, log)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			log.Error(err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 
 		resp, err := lpService.UpdateLesson(r.Context(), &lpmodels.UpdateLesson{
@@ -431,27 +433,27 @@ func DeleteLesson(log *slog.Logger, val *validator.Validate, lpService LPService
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 
 		channelID, err := utils.GetURLParamInt64(r, "channel_id")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 		planID, err := utils.GetURLParamInt64(r, "plan_id")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 		lessonID, err := utils.GetURLParamInt64(r, "lesson_id")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 
 		del, err := lpService.DeleteLesson(r.Context(), &lpmodels.DeleteLesson{

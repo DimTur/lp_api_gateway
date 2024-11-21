@@ -60,21 +60,22 @@ func CreatePlan(log *slog.Logger, val *validator.Validate, lpService LPService) 
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 
 		channelID, err := utils.GetURLParamInt64(r, "id")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 
 		req, err := utils.DecodeRequestBody[CreatePlanRequest](r, log)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			log.Error(err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 
 		resp, err := lpService.CreatePlan(r.Context(), &lpmodels.CreatePlan{
@@ -143,21 +144,21 @@ func GetPlan(log *slog.Logger, val *validator.Validate, lpService LPService) htt
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 
 		channelID, err := utils.GetURLParamInt64(r, "channel_id")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 		planID, err := utils.GetURLParamInt64(r, "plan_id")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 
 		plan, err := lpService.GetPlan(r.Context(), &lpmodels.GetPlan{
@@ -226,15 +227,15 @@ func GetPlans(log *slog.Logger, val *validator.Validate, lpService LPService) ht
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 
 		channelID, err := utils.GetURLParamInt64(r, "id")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 
 		limit, err := utils.GetURLParamInt64(r, "limit")
@@ -310,27 +311,28 @@ func UpdatePlan(log *slog.Logger, val *validator.Validate, lpService LPService) 
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 
 		channelID, err := utils.GetURLParamInt64(r, "channel_id")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 		planID, err := utils.GetURLParamInt64(r, "plan_id")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 
 		req, err := utils.DecodeRequestBody[UpdatePlanRequest](r, log)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			log.Error(err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 
 		resp, err := lpService.UpdatePlan(r.Context(), &lpmodels.UpdatePlan{
@@ -402,21 +404,21 @@ func DeletePlan(log *slog.Logger, val *validator.Validate, lpService LPService) 
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 
 		channelID, err := utils.GetURLParamInt64(r, "channel_id")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 		planID, err := utils.GetURLParamInt64(r, "plan_id")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 
 		del, err := lpService.DeletePlan(r.Context(), &lpmodels.DelPlan{
@@ -485,27 +487,28 @@ func SharePlan(log *slog.Logger, val *validator.Validate, lpService LPService) h
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 
 		channelID, err := utils.GetURLParamInt64(r, "channel_id")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 		planID, err := utils.GetURLParamInt64(r, "plan_id")
 		if err != nil {
 			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 
 		req, err := utils.DecodeRequestBody[SharePlanRequest](r, log)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			log.Error(err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("bad request"))
 		}
 
 		resp, err := lpService.SharePlanWithUser(r.Context(), &lpmodels.SharePlan{

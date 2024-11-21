@@ -7,7 +7,7 @@ import (
 
 type CreateLessonResponse struct {
 	response.Response
-	LessonID int64 `json:"lesson_id,omitempty"`
+	LessonID int64
 }
 
 type GetLessonResponse struct {

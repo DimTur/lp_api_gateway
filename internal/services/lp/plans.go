@@ -92,7 +92,7 @@ func (lp *LpService) GetPlan(ctx context.Context, plan *lpmodels.GetPlan) (*lpmo
 		slog.Int64("plan_id", plan.PlanID),
 	)
 
-	_, span := tracer.AuthTracer.Start(ctx, "GetPlan")
+	_, span := tracer.LPtracer.Start(ctx, "GetPlan")
 	defer span.End()
 
 	span.SetAttributes(
@@ -155,7 +155,7 @@ func (lp *LpService) GetPlans(ctx context.Context, inputParam *lpmodels.GetPlans
 		slog.String("user_id", inputParam.UserID),
 	)
 
-	_, span := tracer.AuthTracer.Start(ctx, "GetPlans")
+	_, span := tracer.LPtracer.Start(ctx, "GetPlans")
 	defer span.End()
 
 	span.SetAttributes(
@@ -220,7 +220,7 @@ func (lp *LpService) UpdatePlan(ctx context.Context, updPlan *lpmodels.UpdatePla
 		slog.Int64("plan_id", updPlan.PlanID),
 	)
 
-	_, span := tracer.AuthTracer.Start(ctx, "UpdatePlan")
+	_, span := tracer.LPtracer.Start(ctx, "UpdatePlan")
 	defer span.End()
 
 	span.SetAttributes(
@@ -303,7 +303,7 @@ func (lp *LpService) DeletePlan(ctx context.Context, delPlan *lpmodels.DelPlan) 
 		slog.Int64("channel_id", delPlan.ChannelID),
 	)
 
-	_, span := tracer.AuthTracer.Start(ctx, "DeletePlan")
+	_, span := tracer.LPtracer.Start(ctx, "DeletePlan")
 	defer span.End()
 
 	span.SetAttributes(
@@ -376,7 +376,7 @@ func (lp *LpService) SharePlanWithUser(ctx context.Context, sharePlanWithUser *l
 		slog.Int64("channel_id", sharePlanWithUser.ChannelID),
 	)
 
-	_, span := tracer.AuthTracer.Start(ctx, "ShareChannelToGroup")
+	_, span := tracer.LPtracer.Start(ctx, "ShareChannelToGroup")
 	defer span.End()
 
 	span.SetAttributes(

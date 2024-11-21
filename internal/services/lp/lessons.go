@@ -227,7 +227,7 @@ func (lp *LpService) UpdateLesson(ctx context.Context, updLesson *lpmodels.Updat
 		slog.Int64("plan_id", updLesson.PlanID),
 	)
 
-	_, span := tracer.AuthTracer.Start(ctx, "UpdateLesson")
+	_, span := tracer.LPtracer.Start(ctx, "UpdateLesson")
 	defer span.End()
 
 	span.SetAttributes(
@@ -269,8 +269,8 @@ func (lp *LpService) UpdateLesson(ctx context.Context, updLesson *lpmodels.Updat
 	}
 
 	// Start updating
-	log.Info("updating plan")
-	span.AddEvent("started_update_plan")
+	log.Info("updating lesson")
+	span.AddEvent("started_update_lesson")
 	resp, err := lp.LessonProvider.UpdateLesson(ctx, updLesson)
 	if err != nil {
 		switch {
@@ -296,7 +296,7 @@ func (lp *LpService) UpdateLesson(ctx context.Context, updLesson *lpmodels.Updat
 	}
 	span.AddEvent("completed_updating_lesson")
 
-	log.Info("channel lesson successfully")
+	log.Info("lesson updated successfully")
 
 	return resp, nil
 }
@@ -311,7 +311,7 @@ func (lp *LpService) DeleteLesson(ctx context.Context, delLess *lpmodels.DeleteL
 		slog.Int64("plan_id", delLess.PlanID),
 	)
 
-	_, span := tracer.AuthTracer.Start(ctx, "DeleteLesson")
+	_, span := tracer.LPtracer.Start(ctx, "DeleteLesson")
 	defer span.End()
 
 	span.SetAttributes(

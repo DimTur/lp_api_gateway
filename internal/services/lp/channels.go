@@ -96,7 +96,7 @@ func (lp *LpService) GetChannel(ctx context.Context, channel *lpmodels.GetChanne
 		slog.Int64("channel_id", channel.ChannelID),
 	)
 
-	_, span := tracer.AuthTracer.Start(ctx, "GetChannel")
+	_, span := tracer.LPtracer.Start(ctx, "GetChannel")
 	defer span.End()
 
 	span.SetAttributes(
@@ -155,7 +155,7 @@ func (lp *LpService) GetChannels(ctx context.Context, inputParam *lpmodels.GetCh
 		slog.String("user_id", inputParam.UserID),
 	)
 
-	_, span := tracer.AuthTracer.Start(ctx, "GetChannels")
+	_, span := tracer.LPtracer.Start(ctx, "GetChannels")
 	defer span.End()
 
 	span.SetAttributes(
@@ -220,7 +220,7 @@ func (lp *LpService) UpdateChannel(ctx context.Context, updChannel *lpmodels.Upd
 		slog.Int64("channel_id", updChannel.ChannelID),
 	)
 
-	_, span := tracer.AuthTracer.Start(ctx, "UpdateChannel")
+	_, span := tracer.LPtracer.Start(ctx, "UpdateChannel")
 	defer span.End()
 
 	span.SetAttributes(
@@ -301,7 +301,7 @@ func (lp *LpService) DeleteChannel(ctx context.Context, delChannel *lpmodels.Del
 		slog.Int64("channel_id", delChannel.ChannelID),
 	)
 
-	_, span := tracer.AuthTracer.Start(ctx, "DeleteChannel")
+	_, span := tracer.LPtracer.Start(ctx, "DeleteChannel")
 	defer span.End()
 
 	// Validation
@@ -366,7 +366,7 @@ func (lp *LpService) ShareChannelToGroup(ctx context.Context, s *lpmodels.Sharin
 		slog.Int64("channel_id", s.ChannelID),
 	)
 
-	_, span := tracer.AuthTracer.Start(ctx, "ShareChannelToGroup")
+	_, span := tracer.LPtracer.Start(ctx, "ShareChannelToGroup")
 	defer span.End()
 
 	// Validation

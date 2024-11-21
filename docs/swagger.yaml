@@ -217,7 +217,7 @@ definitions:
     properties:
       error:
         type: string
-      lesson_id:
+      lessonID:
         type: integer
       status:
         type: string
@@ -266,6 +266,23 @@ definitions:
         type: string
       updateLessonResponse:
         $ref: '#/definitions/lpmodels.UpdateLessonResponse'
+    type: object
+  lpmodels.BasePage:
+    properties:
+      content_type:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: string
+      id:
+        type: integer
+      last_modified_by:
+        type: string
+      lesson_id:
+        type: integer
+      modified:
+        type: string
     type: object
   lpmodels.Channel:
     properties:
@@ -343,6 +360,48 @@ definitions:
       public:
         type: boolean
     type: object
+  lpmodels.ImagePage:
+    properties:
+      content_type:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: string
+      id:
+        type: integer
+      imageFileUrl:
+        type: string
+      imageName:
+        type: string
+      last_modified_by:
+        type: string
+      lesson_id:
+        type: integer
+      modified:
+        type: string
+    type: object
+  lpmodels.PDFPage:
+    properties:
+      content_type:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: string
+      id:
+        type: integer
+      last_modified_by:
+        type: string
+      lesson_id:
+        type: integer
+      modified:
+        type: string
+      pdfFileUrl:
+        type: string
+      pdfName:
+        type: string
+    type: object
   lpmodels.Plan:
     properties:
       createdAt:
@@ -371,12 +430,156 @@ definitions:
       success:
         type: boolean
     type: object
+  lpmodels.UpdatePageResponse:
+    properties:
+      id:
+        type: integer
+      success:
+        type: boolean
+    type: object
   lpmodels.UpdatePlanResponse:
     properties:
       id:
         type: integer
       success:
         type: boolean
+    type: object
+  lpmodels.VideoPage:
+    properties:
+      content_type:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: string
+      id:
+        type: integer
+      last_modified_by:
+        type: string
+      lesson_id:
+        type: integer
+      modified:
+        type: string
+      videoFileUrl:
+        type: string
+      videoName:
+        type: string
+    type: object
+  pageshandler.CreateImagePageRequest:
+    properties:
+      image_file_url:
+        type: string
+      image_name:
+        type: string
+    required:
+    - image_file_url
+    - image_name
+    type: object
+  pageshandler.CreatePDFPageRequest:
+    properties:
+      pdf_file_url:
+        type: string
+      pdf_name:
+        type: string
+    required:
+    - pdf_file_url
+    - pdf_name
+    type: object
+  pageshandler.CreatePageResponse:
+    properties:
+      error:
+        type: string
+      pageID:
+        type: integer
+      status:
+        type: string
+    type: object
+  pageshandler.CreateVideoPageRequest:
+    properties:
+      video_file_url:
+        type: string
+      video_name:
+        type: string
+    required:
+    - video_file_url
+    - video_name
+    type: object
+  pageshandler.DeletePageResponse:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+      success:
+        type: boolean
+    type: object
+  pageshandler.GetImagePageResponse:
+    properties:
+      error:
+        type: string
+      imagePage:
+        $ref: '#/definitions/lpmodels.ImagePage'
+      status:
+        type: string
+    type: object
+  pageshandler.GetPDFPageResponse:
+    properties:
+      error:
+        type: string
+      pdfpage:
+        $ref: '#/definitions/lpmodels.PDFPage'
+      status:
+        type: string
+    type: object
+  pageshandler.GetPagesResponse:
+    properties:
+      error:
+        type: string
+      pages:
+        items:
+          $ref: '#/definitions/lpmodels.BasePage'
+        type: array
+      status:
+        type: string
+    type: object
+  pageshandler.GetVideoPageResponse:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+      videoPage:
+        $ref: '#/definitions/lpmodels.VideoPage'
+    type: object
+  pageshandler.UpdateImagePageRequest:
+    properties:
+      image_file_url:
+        type: string
+      image_name:
+        type: string
+    type: object
+  pageshandler.UpdatePDFPageRequest:
+    properties:
+      pdf_file_url:
+        type: string
+      pdf_name:
+        type: string
+    type: object
+  pageshandler.UpdatePageResponse:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+      updatePageResponse:
+        $ref: '#/definitions/lpmodels.UpdatePageResponse'
+    type: object
+  pageshandler.UpdateVideoPageRequest:
+    properties:
+      video_file_url:
+        type: string
+      video_name:
+        type: string
     type: object
   planshandler.CreatePlanRequest:
     properties:
@@ -1051,6 +1254,624 @@ paths:
       summary: Update lesson by id
       tags:
       - lessons
+  /channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/image_page:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint allows users to create a new image page with the
+        specified data.
+      parameters:
+      - description: ID of the channel
+        in: path
+        name: channel_id
+        required: true
+        type: integer
+      - description: ID of the plan
+        in: path
+        name: plan_id
+        required: true
+        type: integer
+      - description: ID of the lesson
+        in: path
+        name: lesson_id
+        required: true
+        type: integer
+      - description: Image page creation parameters
+        in: body
+        name: pageshandler.CreateImagePageRequest
+        required: true
+        schema:
+          $ref: '#/definitions/pageshandler.CreateImagePageRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/pageshandler.CreatePageResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new image page
+      tags:
+      - pages
+  /channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/image_page/{page_id}:
+    get:
+      consumes:
+      - application/json
+      description: This endpoint returns image information by ID.
+      parameters:
+      - description: ID of the channel
+        in: path
+        name: channel_id
+        required: true
+        type: integer
+      - description: ID of the plan
+        in: path
+        name: plan_id
+        required: true
+        type: integer
+      - description: ID of the lesson
+        in: path
+        name: lesson_id
+        required: true
+        type: integer
+      - description: ID of the page
+        in: path
+        name: page_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pageshandler.GetImagePageResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Lesson not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get image page information
+      tags:
+      - pages
+    patch:
+      consumes:
+      - application/json
+      description: This endpoint allows image page id and update it.
+      parameters:
+      - description: ID of the channel
+        in: path
+        name: channel_id
+        required: true
+        type: integer
+      - description: ID of the plan
+        in: path
+        name: plan_id
+        required: true
+        type: integer
+      - description: ID of the lesson
+        in: path
+        name: lesson_id
+        required: true
+        type: integer
+      - description: ID of the page
+        in: path
+        name: page_id
+        required: true
+        type: integer
+      - description: Image page updating parameters
+        in: body
+        name: pageshandler.UpdateImagePageRequest
+        required: true
+        schema:
+          $ref: '#/definitions/pageshandler.UpdateImagePageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pageshandler.UpdatePageResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Lesson not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update image page by id
+      tags:
+      - pages
+  /channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/pages:
+    get:
+      consumes:
+      - application/json
+      description: This endpoint returns pages information relevant for user.
+      parameters:
+      - description: ID of the channel
+        in: path
+        name: channel_id
+        required: true
+        type: integer
+      - description: ID of the plan
+        in: path
+        name: plan_id
+        required: true
+        type: integer
+      - description: ID of the lesson
+        in: path
+        name: lesson_id
+        required: true
+        type: integer
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/pageshandler.GetPagesResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get all pages from lesson relevant for user
+      tags:
+      - pages
+  /channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/pages/{page_id}:
+    delete:
+      consumes:
+      - application/json
+      description: This endpoint allows page id and delete it.
+      parameters:
+      - description: ID of the channel
+        in: path
+        name: channel_id
+        required: true
+        type: integer
+      - description: ID of the plan
+        in: path
+        name: plan_id
+        required: true
+        type: integer
+      - description: ID of the lesson
+        in: path
+        name: lesson_id
+        required: true
+        type: integer
+      - description: ID of the page
+        in: path
+        name: page_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pageshandler.DeletePageResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Lesson not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete page by id
+      tags:
+      - pages
+  /channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/pdf_page:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint allows users to create a new pdf page with the specified
+        data.
+      parameters:
+      - description: ID of the channel
+        in: path
+        name: channel_id
+        required: true
+        type: integer
+      - description: ID of the plan
+        in: path
+        name: plan_id
+        required: true
+        type: integer
+      - description: ID of the lesson
+        in: path
+        name: lesson_id
+        required: true
+        type: integer
+      - description: PDF page creation parameters
+        in: body
+        name: pageshandler.CreatePDFPageRequest
+        required: true
+        schema:
+          $ref: '#/definitions/pageshandler.CreatePDFPageRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/pageshandler.CreatePageResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new pdf page
+      tags:
+      - pages
+  /channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/pdf_page/{page_id}:
+    get:
+      consumes:
+      - application/json
+      description: This endpoint returns pdf information by ID.
+      parameters:
+      - description: ID of the channel
+        in: path
+        name: channel_id
+        required: true
+        type: integer
+      - description: ID of the plan
+        in: path
+        name: plan_id
+        required: true
+        type: integer
+      - description: ID of the lesson
+        in: path
+        name: lesson_id
+        required: true
+        type: integer
+      - description: ID of the page
+        in: path
+        name: page_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pageshandler.GetPDFPageResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Lesson not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get pdf page information
+      tags:
+      - pages
+    patch:
+      consumes:
+      - application/json
+      description: This endpoint allows pdf page id and update it.
+      parameters:
+      - description: ID of the channel
+        in: path
+        name: channel_id
+        required: true
+        type: integer
+      - description: ID of the plan
+        in: path
+        name: plan_id
+        required: true
+        type: integer
+      - description: ID of the lesson
+        in: path
+        name: lesson_id
+        required: true
+        type: integer
+      - description: ID of the page
+        in: path
+        name: page_id
+        required: true
+        type: integer
+      - description: PDF page updating parameters
+        in: body
+        name: pageshandler.UpdatePDFPageRequest
+        required: true
+        schema:
+          $ref: '#/definitions/pageshandler.UpdatePDFPageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pageshandler.UpdatePageResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Lesson not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update pdf page by id
+      tags:
+      - pages
+  /channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/video_page:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint allows users to create a new video page with the
+        specified data.
+      parameters:
+      - description: ID of the channel
+        in: path
+        name: channel_id
+        required: true
+        type: integer
+      - description: ID of the plan
+        in: path
+        name: plan_id
+        required: true
+        type: integer
+      - description: ID of the lesson
+        in: path
+        name: lesson_id
+        required: true
+        type: integer
+      - description: Video page creation parameters
+        in: body
+        name: pageshandler.CreateVideoPageRequest
+        required: true
+        schema:
+          $ref: '#/definitions/pageshandler.CreateVideoPageRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/pageshandler.CreatePageResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new video page
+      tags:
+      - pages
+  /channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/video_page/{page_id}:
+    get:
+      consumes:
+      - application/json
+      description: This endpoint returns video information by ID.
+      parameters:
+      - description: ID of the channel
+        in: path
+        name: channel_id
+        required: true
+        type: integer
+      - description: ID of the plan
+        in: path
+        name: plan_id
+        required: true
+        type: integer
+      - description: ID of the lesson
+        in: path
+        name: lesson_id
+        required: true
+        type: integer
+      - description: ID of the page
+        in: path
+        name: page_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pageshandler.GetVideoPageResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Lesson not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get video page information
+      tags:
+      - pages
+    patch:
+      consumes:
+      - application/json
+      description: This endpoint allows video page id and update it.
+      parameters:
+      - description: ID of the channel
+        in: path
+        name: channel_id
+        required: true
+        type: integer
+      - description: ID of the plan
+        in: path
+        name: plan_id
+        required: true
+        type: integer
+      - description: ID of the lesson
+        in: path
+        name: lesson_id
+        required: true
+        type: integer
+      - description: ID of the page
+        in: path
+        name: page_id
+        required: true
+        type: integer
+      - description: Video page updating parameters
+        in: body
+        name: pageshandler.UpdateVideoPageRequest
+        required: true
+        schema:
+          $ref: '#/definitions/pageshandler.UpdateVideoPageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pageshandler.UpdatePageResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Lesson not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update video page by id
+      tags:
+      - pages
   /channels/{channel_id}/plans/{plan_id}/share:
     post:
       consumes:
