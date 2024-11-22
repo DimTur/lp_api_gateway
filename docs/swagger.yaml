@@ -360,6 +360,39 @@ definitions:
       public:
         type: boolean
     type: object
+  lpmodels.GetQuestionPage:
+    properties:
+      answer:
+        type: string
+      content_type:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: string
+      id:
+        type: integer
+      last_modified_by:
+        type: string
+      lesson_id:
+        type: integer
+      modified:
+        type: string
+      option_a:
+        type: string
+      option_b:
+        type: string
+      option_c:
+        type: string
+      option_d:
+        type: string
+      option_e:
+        type: string
+      question:
+        type: string
+      question_type:
+        type: string
+    type: object
   lpmodels.ImagePage:
     properties:
       content_type:
@@ -668,6 +701,72 @@ definitions:
         type: string
       updatePlanResponse:
         $ref: '#/definitions/lpmodels.UpdatePlanResponse'
+    type: object
+  questionshandler.CreatePageResponse:
+    properties:
+      error:
+        type: string
+      pageID:
+        type: integer
+      status:
+        type: string
+    type: object
+  questionshandler.CreateQuestionPageRequest:
+    properties:
+      answer:
+        type: string
+      option_a:
+        type: string
+      option_b:
+        type: string
+      option_c:
+        type: string
+      option_d:
+        type: string
+      option_e:
+        type: string
+      question:
+        type: string
+    required:
+    - answer
+    - option_a
+    - option_b
+    - question
+    type: object
+  questionshandler.GetQuestionPageResponse:
+    properties:
+      error:
+        type: string
+      questionPage:
+        $ref: '#/definitions/lpmodels.GetQuestionPage'
+      status:
+        type: string
+    type: object
+  questionshandler.UpdatePageResponse:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+      updatePageResponse:
+        $ref: '#/definitions/lpmodels.UpdatePageResponse'
+    type: object
+  questionshandler.UpdateQuestinPageRequest:
+    properties:
+      answer:
+        type: string
+      option_a:
+        type: string
+      option_b:
+        type: string
+      option_c:
+        type: string
+      option_d:
+        type: string
+      option_e:
+        type: string
+      question:
+        type: string
     type: object
   response.Response:
     properties:
@@ -1703,6 +1802,175 @@ paths:
       summary: Update pdf page by id
       tags:
       - pages
+  /channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/question_page:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint allows users to create a new questin page with the
+        specified data.
+      parameters:
+      - description: ID of the channel
+        in: path
+        name: channel_id
+        required: true
+        type: integer
+      - description: ID of the plan
+        in: path
+        name: plan_id
+        required: true
+        type: integer
+      - description: ID of the lesson
+        in: path
+        name: lesson_id
+        required: true
+        type: integer
+      - description: Question page creation parameters
+        in: body
+        name: questionshandler.CreateQuestionPageRequest
+        required: true
+        schema:
+          $ref: '#/definitions/questionshandler.CreateQuestionPageRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/questionshandler.CreatePageResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new question page
+      tags:
+      - questions
+  /channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/question_page/{page_id}:
+    get:
+      consumes:
+      - application/json
+      description: This endpoint returns question information by ID.
+      parameters:
+      - description: ID of the channel
+        in: path
+        name: channel_id
+        required: true
+        type: integer
+      - description: ID of the plan
+        in: path
+        name: plan_id
+        required: true
+        type: integer
+      - description: ID of the lesson
+        in: path
+        name: lesson_id
+        required: true
+        type: integer
+      - description: ID of the page
+        in: path
+        name: page_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/questionshandler.GetQuestionPageResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Lesson not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get question page information
+      tags:
+      - questions
+    patch:
+      consumes:
+      - application/json
+      description: This endpoint allows question page id and update it.
+      parameters:
+      - description: ID of the channel
+        in: path
+        name: channel_id
+        required: true
+        type: integer
+      - description: ID of the plan
+        in: path
+        name: plan_id
+        required: true
+        type: integer
+      - description: ID of the lesson
+        in: path
+        name: lesson_id
+        required: true
+        type: integer
+      - description: ID of the page
+        in: path
+        name: page_id
+        required: true
+        type: integer
+      - description: Question page updating parameters
+        in: body
+        name: questionshandler.UpdateQuestinPageRequest
+        required: true
+        schema:
+          $ref: '#/definitions/questionshandler.UpdateQuestinPageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/questionshandler.UpdatePageResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Question not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update question page by id
+      tags:
+      - questions
   /channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/video_page:
     post:
       consumes:

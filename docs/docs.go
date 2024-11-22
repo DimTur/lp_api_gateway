@@ -1417,6 +1417,261 @@ const docTemplate = `{
                 }
             }
         },
+        "/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/question_page": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "This endpoint allows users to create a new questin page with the specified data.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "questions"
+                ],
+                "summary": "Create a new question page",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of the channel",
+                        "name": "channel_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the plan",
+                        "name": "plan_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the lesson",
+                        "name": "lesson_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Question page creation parameters",
+                        "name": "questionshandler.CreateQuestionPageRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/questionshandler.CreateQuestionPageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/questionshandler.CreatePageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data in the request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/question_page/{page_id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "This endpoint returns question information by ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "questions"
+                ],
+                "summary": "Get question page information",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of the channel",
+                        "name": "channel_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the plan",
+                        "name": "plan_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the lesson",
+                        "name": "lesson_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the page",
+                        "name": "page_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/questionshandler.GetQuestionPageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data in the request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Lesson not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "This endpoint allows question page id and update it.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "questions"
+                ],
+                "summary": "Update question page by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of the channel",
+                        "name": "channel_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the plan",
+                        "name": "plan_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the lesson",
+                        "name": "lesson_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the page",
+                        "name": "page_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Question page updating parameters",
+                        "name": "questionshandler.UpdateQuestinPageRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/questionshandler.UpdateQuestinPageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/questionshandler.UpdatePageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data in the request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Question not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/video_page": {
             "post": {
                 "security": [
@@ -3241,6 +3496,56 @@ const docTemplate = `{
                 }
             }
         },
+        "lpmodels.GetQuestionPage": {
+            "type": "object",
+            "properties": {
+                "answer": {
+                    "type": "string"
+                },
+                "content_type": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "last_modified_by": {
+                    "type": "string"
+                },
+                "lesson_id": {
+                    "type": "integer"
+                },
+                "modified": {
+                    "type": "string"
+                },
+                "option_a": {
+                    "type": "string"
+                },
+                "option_b": {
+                    "type": "string"
+                },
+                "option_c": {
+                    "type": "string"
+                },
+                "option_d": {
+                    "type": "string"
+                },
+                "option_e": {
+                    "type": "string"
+                },
+                "question": {
+                    "type": "string"
+                },
+                "question_type": {
+                    "type": "string"
+                }
+            }
+        },
         "lpmodels.ImagePage": {
             "type": "object",
             "properties": {
@@ -3714,6 +4019,106 @@ const docTemplate = `{
                 },
                 "updatePlanResponse": {
                     "$ref": "#/definitions/lpmodels.UpdatePlanResponse"
+                }
+            }
+        },
+        "questionshandler.CreatePageResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "pageID": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "questionshandler.CreateQuestionPageRequest": {
+            "type": "object",
+            "required": [
+                "answer",
+                "option_a",
+                "option_b",
+                "question"
+            ],
+            "properties": {
+                "answer": {
+                    "type": "string"
+                },
+                "option_a": {
+                    "type": "string"
+                },
+                "option_b": {
+                    "type": "string"
+                },
+                "option_c": {
+                    "type": "string"
+                },
+                "option_d": {
+                    "type": "string"
+                },
+                "option_e": {
+                    "type": "string"
+                },
+                "question": {
+                    "type": "string"
+                }
+            }
+        },
+        "questionshandler.GetQuestionPageResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "questionPage": {
+                    "$ref": "#/definitions/lpmodels.GetQuestionPage"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "questionshandler.UpdatePageResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "updatePageResponse": {
+                    "$ref": "#/definitions/lpmodels.UpdatePageResponse"
+                }
+            }
+        },
+        "questionshandler.UpdateQuestinPageRequest": {
+            "type": "object",
+            "properties": {
+                "answer": {
+                    "type": "string"
+                },
+                "option_a": {
+                    "type": "string"
+                },
+                "option_b": {
+                    "type": "string"
+                },
+                "option_c": {
+                    "type": "string"
+                },
+                "option_d": {
+                    "type": "string"
+                },
+                "option_e": {
+                    "type": "string"
+                },
+                "question": {
+                    "type": "string"
                 }
             }
         },

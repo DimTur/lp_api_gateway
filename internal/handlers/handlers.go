@@ -9,6 +9,7 @@ import (
 	lessonshandler "github.com/DimTur/lp_api_gateway/internal/handlers/learning_platform/lessons"
 	pageshandler "github.com/DimTur/lp_api_gateway/internal/handlers/learning_platform/pages"
 	planshandler "github.com/DimTur/lp_api_gateway/internal/handlers/learning_platform/plans"
+	questionshandler "github.com/DimTur/lp_api_gateway/internal/handlers/learning_platform/questions"
 	authmiddleware "github.com/DimTur/lp_api_gateway/internal/handlers/middleware/auth"
 	authhandler "github.com/DimTur/lp_api_gateway/internal/handlers/sso/auth"
 	learninggrouphandler "github.com/DimTur/lp_api_gateway/internal/handlers/sso/learning_group"
@@ -135,15 +136,20 @@ func (c *ChiRouterConfigurator) ConfigureRouter() http.Handler {
 		// Pages
 		r.Post("/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/image_page", pageshandler.CreateImagePage(c.Logger, c.validator, &c.LpService))
 		r.Post("/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/video_page", pageshandler.CreateVideoPage(c.Logger, c.validator, &c.LpService))
-		r.Post("/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/pdf_page", pageshandler.CreateVideoPage(c.Logger, c.validator, &c.LpService))
-		r.Get("/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/image_page/{page_id}}", pageshandler.GetImagePage(c.Logger, c.validator, &c.LpService))
-		r.Get("/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/video_page/{page_id}}", pageshandler.GetVideoPage(c.Logger, c.validator, &c.LpService))
-		r.Get("/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/pdf_page/{page_id}}", pageshandler.GetPDFPage(c.Logger, c.validator, &c.LpService))
+		r.Post("/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/pdf_page", pageshandler.CreatePDFPage(c.Logger, c.validator, &c.LpService))
+		r.Get("/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/image_page/{page_id}", pageshandler.GetImagePage(c.Logger, c.validator, &c.LpService))
+		r.Get("/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/video_page/{page_id}", pageshandler.GetVideoPage(c.Logger, c.validator, &c.LpService))
+		r.Get("/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/pdf_page/{page_id}", pageshandler.GetPDFPage(c.Logger, c.validator, &c.LpService))
 		r.Get("/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/pages", pageshandler.GetPages(c.Logger, c.validator, &c.LpService))
 		r.Patch("/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/image_page/{page_id}", pageshandler.UpdateImagePage(c.Logger, c.validator, &c.LpService))
 		r.Patch("/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/video_page/{page_id}", pageshandler.UpdateVideoPage(c.Logger, c.validator, &c.LpService))
 		r.Patch("/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/pdf_page/{page_id}", pageshandler.UpdatePDFPage(c.Logger, c.validator, &c.LpService))
 		r.Delete("/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/pages/{page_id}", pageshandler.DeletePage(c.Logger, c.validator, &c.LpService))
+
+		// Questions
+		r.Post("/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/question_page", questionshandler.CreateQuestionPage(c.Logger, c.validator, &c.LpService))
+		r.Get("/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/question_page/{page_id}", questionshandler.GetQuestionPage(c.Logger, c.validator, &c.LpService))
+		r.Patch("/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/question_page/{page_id}", questionshandler.UpdateQuestionPage(c.Logger, c.validator, &c.LpService))
 	})
 
 	return router

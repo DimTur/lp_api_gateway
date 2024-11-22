@@ -51,6 +51,12 @@ type PageServiceProvider interface {
 	DeletePage(ctx context.Context, delPage *lpmodels.DeletePage) (*lpmodels.DeletePageResponse, error)
 }
 
+type QuestionServiceProvider interface {
+	CreateQuestionPage(ctx context.Context, question *lpmodels.CreateQuestionPage) (*lpmodels.CreatePageResponse, error)
+	GetQuestionPage(ctx context.Context, question *lpmodels.GetPage) (*lpmodels.GetQuestionPage, error)
+	UpdateQuestionPage(ctx context.Context, updQust *lpmodels.UpdateQuestionPage) (*lpmodels.UpdatePageResponse, error)
+}
+
 type LgServiceProvider interface {
 	UserIsLearnerIn(ctx context.Context, user *ssomodels.UserIsLearnerIn) ([]string, error)
 }
@@ -66,6 +72,7 @@ type LpService struct {
 	PlanProvider        PlanServiceProvider
 	LessonProvider      LessonServiceProvider
 	PageProvider        PageServiceProvider
+	QuestionProvider    QuestionServiceProvider
 	LgServiceProvider   LgServiceProvider
 	PermissionsProvider permissions.PermissionsService
 }
@@ -77,6 +84,7 @@ func New(
 	planProvider PlanServiceProvider,
 	lessonProvider LessonServiceProvider,
 	pageProvider PageServiceProvider,
+	questionProvider QuestionServiceProvider,
 	lgServiceProvider LgServiceProvider,
 	permissionsProvider permissions.PermissionsService,
 ) *LpService {
@@ -87,6 +95,7 @@ func New(
 		PlanProvider:        planProvider,
 		LessonProvider:      lessonProvider,
 		PageProvider:        pageProvider,
+		QuestionProvider:    questionProvider,
 		LgServiceProvider:   lgServiceProvider,
 		PermissionsProvider: permissionsProvider,
 	}

@@ -1,11 +1,10 @@
 package lpmodels
 
 type CreateBasePage struct {
-	LessonID    int64  `json:"lesson_id" validate:"required"`
-	PlanID      int64  `json:"plan_id" validate:"required"`
-	ChannelID   int64  `json:"channel_id" validate:"required"`
-	CreatedBy   string `json:"created_by" validate:"required"`
-	ContentType string `json:"content_type" validate:"required"`
+	LessonID  int64  `json:"lesson_id" validate:"required"`
+	PlanID    int64  `json:"plan_id" validate:"required"`
+	ChannelID int64  `json:"channel_id" validate:"required"`
+	CreatedBy string `json:"created_by" validate:"required"`
 }
 
 type CreateImagePage struct {
@@ -81,7 +80,6 @@ type UpdateBasePage struct {
 	PlanID         int64  `json:"plan_id" validate:"required"`
 	LessonID       int64  `json:"lesson_id" validate:"required"`
 	LastModifiedBy string `json:"last_modified_by" validate:"required"`
-	ContentType    string `json:"content_type" validate:"required"`
 }
 
 type UpdateImagePage struct {

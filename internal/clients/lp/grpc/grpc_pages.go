@@ -14,7 +14,6 @@ import (
 
 var (
 	ErrPageNotFound = errors.New("page not found")
-	ErrUnContType   = errors.New("unsupported content type")
 )
 
 func (c *Client) CreateImagePage(ctx context.Context, page *lpmodels.CreateImagePage) (*lpmodels.CreatePageResponse, error) {
@@ -371,7 +370,7 @@ func (c *Client) DeletePage(ctx context.Context, delPage *lpmodels.DeletePage) (
 			c.log.Error("page not found", slog.String("err", err.Error()))
 			return &lpmodels.DeletePageResponse{
 				Success: false,
-			}, fmt.Errorf("%s: %w", op, ErrLessonNotFound)
+			}, fmt.Errorf("%s: %w", op, ErrPageNotFound)
 		default:
 			c.log.Error("internal error", slog.String("err", err.Error()))
 			return &lpmodels.DeletePageResponse{

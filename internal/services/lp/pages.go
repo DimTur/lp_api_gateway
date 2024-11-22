@@ -24,7 +24,6 @@ func (lp *LpService) CreateImagePage(ctx context.Context, page *lpmodels.CreateI
 		slog.String("op", op),
 		slog.String("user_id", page.CreatedBy),
 		slog.String("page_name", page.ImageName),
-		slog.String("page_type", page.CreateBasePage.ContentType),
 	)
 
 	_, span := tracer.LPtracer.Start(ctx, "CreateImagePage")
@@ -33,7 +32,6 @@ func (lp *LpService) CreateImagePage(ctx context.Context, page *lpmodels.CreateI
 	span.SetAttributes(
 		attribute.String("user_id", page.CreatedBy),
 		attribute.String("page_name", page.ImageName),
-		attribute.String("page_type", page.CreateBasePage.ContentType),
 	)
 
 	// Validation
@@ -93,7 +91,6 @@ func (lp *LpService) CreateVideoPage(ctx context.Context, page *lpmodels.CreateV
 		slog.String("op", op),
 		slog.String("user_id", page.CreatedBy),
 		slog.String("page_name", page.VideoName),
-		slog.String("page_type", page.CreateBasePage.ContentType),
 	)
 
 	_, span := tracer.LPtracer.Start(ctx, "CreateVideoPage")
@@ -102,7 +99,6 @@ func (lp *LpService) CreateVideoPage(ctx context.Context, page *lpmodels.CreateV
 	span.SetAttributes(
 		attribute.String("user_id", page.CreatedBy),
 		attribute.String("page_name", page.VideoName),
-		attribute.String("page_type", page.CreateBasePage.ContentType),
 	)
 
 	// Validation
@@ -162,7 +158,6 @@ func (lp *LpService) CreatePdfPage(ctx context.Context, page *lpmodels.CreatePDF
 		slog.String("op", op),
 		slog.String("user_id", page.CreatedBy),
 		slog.String("page_name", page.PdfName),
-		slog.String("page_type", page.CreateBasePage.ContentType),
 	)
 
 	_, span := tracer.LPtracer.Start(ctx, "CreatePdfPage")
@@ -171,7 +166,6 @@ func (lp *LpService) CreatePdfPage(ctx context.Context, page *lpmodels.CreatePDF
 	span.SetAttributes(
 		attribute.String("user_id", page.CreatedBy),
 		attribute.String("page_name", page.PdfName),
-		attribute.String("page_type", page.CreateBasePage.ContentType),
 	)
 
 	// Validation
@@ -275,7 +269,7 @@ func (lp *LpService) GetImagePage(ctx context.Context, page *lpmodels.GetPage) (
 	if err != nil {
 		switch {
 		case errors.Is(err, lpgrpc.ErrPageNotFound):
-			log.Error("image page not found", slog.Any("page_id", page.LessonID))
+			log.Error("image page not found", slog.Any("page_id", page.PageID))
 			return &lpmodels.ImagePage{}, fmt.Errorf("%s: %w", op, ErrPageNotFound)
 		default:
 			log.Error("failed to get image page", slog.String("err", err.Error()))
@@ -340,7 +334,7 @@ func (lp *LpService) GetVideoPage(ctx context.Context, page *lpmodels.GetPage) (
 	if err != nil {
 		switch {
 		case errors.Is(err, lpgrpc.ErrPageNotFound):
-			log.Error("video page not found", slog.Any("page_id", page.LessonID))
+			log.Error("video page not found", slog.Any("page_id", page.PageID))
 			return &lpmodels.VideoPage{}, fmt.Errorf("%s: %w", op, ErrPageNotFound)
 		default:
 			log.Error("failed to get video page", slog.String("err", err.Error()))
@@ -405,7 +399,7 @@ func (lp *LpService) GetPDFPage(ctx context.Context, page *lpmodels.GetPage) (*l
 	if err != nil {
 		switch {
 		case errors.Is(err, lpgrpc.ErrPageNotFound):
-			log.Error("pdf page not found", slog.Any("page_id", page.LessonID))
+			log.Error("pdf page not found", slog.Any("page_id", page.PageID))
 			return &lpmodels.PDFPage{}, fmt.Errorf("%s: %w", op, ErrPageNotFound)
 		default:
 			log.Error("failed to get pdf page", slog.String("err", err.Error()))
@@ -555,7 +549,7 @@ func (lp *LpService) UpdateImagePage(ctx context.Context, updIPage *lpmodels.Upd
 				Success: false,
 			}, fmt.Errorf("%s: %w", op, ErrPageNotFound)
 		default:
-			log.Error("failed to update lesson", slog.String("err", err.Error()))
+			log.Error("failed to update image page", slog.String("err", err.Error()))
 			return &lpmodels.UpdatePageResponse{
 				ID:      0,
 				Success: false,
@@ -639,7 +633,7 @@ func (lp *LpService) UpdateVideoPage(ctx context.Context, updIPage *lpmodels.Upd
 				Success: false,
 			}, fmt.Errorf("%s: %w", op, ErrPageNotFound)
 		default:
-			log.Error("failed to update lesson", slog.String("err", err.Error()))
+			log.Error("failed to update video page", slog.String("err", err.Error()))
 			return &lpmodels.UpdatePageResponse{
 				ID:      0,
 				Success: false,
@@ -723,7 +717,7 @@ func (lp *LpService) UpdatePDFPage(ctx context.Context, updIPage *lpmodels.Updat
 				Success: false,
 			}, fmt.Errorf("%s: %w", op, ErrPageNotFound)
 		default:
-			log.Error("failed to update lesson", slog.String("err", err.Error()))
+			log.Error("failed to update pdf page", slog.String("err", err.Error()))
 			return &lpmodels.UpdatePageResponse{
 				ID:      0,
 				Success: false,
