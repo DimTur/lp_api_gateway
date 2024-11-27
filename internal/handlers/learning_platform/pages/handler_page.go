@@ -62,7 +62,7 @@ func CreateImagePage(log *slog.Logger, val *validator.Validate, lpService LPServ
 		)
 
 		meter.AllReqCount.Add(r.Context(), 1)
-		meter.CreateChannelReqCount.Add(r.Context(), 1)
+		meter.CreateImagePageReqCount.Add(r.Context(), 1)
 
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
@@ -163,7 +163,7 @@ func CreateVideoPage(log *slog.Logger, val *validator.Validate, lpService LPServ
 		)
 
 		meter.AllReqCount.Add(r.Context(), 1)
-		meter.CreateChannelReqCount.Add(r.Context(), 1)
+		meter.CreateVideoPageReqCount.Add(r.Context(), 1)
 
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
@@ -264,7 +264,7 @@ func CreatePDFPage(log *slog.Logger, val *validator.Validate, lpService LPServic
 		)
 
 		meter.AllReqCount.Add(r.Context(), 1)
-		meter.CreateChannelReqCount.Add(r.Context(), 1)
+		meter.CreatePDFPageReqCount.Add(r.Context(), 1)
 
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
@@ -365,7 +365,7 @@ func GetImagePage(log *slog.Logger, val *validator.Validate, lpService LPService
 		)
 
 		meter.AllReqCount.Add(r.Context(), 1)
-		meter.CreateChannelReqCount.Add(r.Context(), 1)
+		meter.GetImagePageReqCount.Add(r.Context(), 1)
 
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
@@ -463,7 +463,7 @@ func GetVideoPage(log *slog.Logger, val *validator.Validate, lpService LPService
 		)
 
 		meter.AllReqCount.Add(r.Context(), 1)
-		meter.CreateChannelReqCount.Add(r.Context(), 1)
+		meter.GetVideoPageReqCount.Add(r.Context(), 1)
 
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
@@ -561,7 +561,7 @@ func GetPDFPage(log *slog.Logger, val *validator.Validate, lpService LPService) 
 		)
 
 		meter.AllReqCount.Add(r.Context(), 1)
-		meter.CreateChannelReqCount.Add(r.Context(), 1)
+		meter.GetPDFPageReqCount.Add(r.Context(), 1)
 
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
@@ -660,7 +660,7 @@ func GetPages(log *slog.Logger, val *validator.Validate, lpService LPService) ht
 		)
 
 		meter.AllReqCount.Add(r.Context(), 1)
-		meter.CreateChannelReqCount.Add(r.Context(), 1)
+		meter.GetPagesReqCount.Add(r.Context(), 1)
 
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
@@ -760,7 +760,7 @@ func UpdateImagePage(log *slog.Logger, val *validator.Validate, lpService LPServ
 		)
 
 		meter.AllReqCount.Add(r.Context(), 1)
-		meter.CreateChannelReqCount.Add(r.Context(), 1)
+		meter.UpdateImagePageReqCount.Add(r.Context(), 1)
 
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
@@ -870,7 +870,7 @@ func UpdateVideoPage(log *slog.Logger, val *validator.Validate, lpService LPServ
 		)
 
 		meter.AllReqCount.Add(r.Context(), 1)
-		meter.CreateChannelReqCount.Add(r.Context(), 1)
+		meter.UpdateVideoPageReqCount.Add(r.Context(), 1)
 
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
@@ -980,7 +980,7 @@ func UpdatePDFPage(log *slog.Logger, val *validator.Validate, lpService LPServic
 		)
 
 		meter.AllReqCount.Add(r.Context(), 1)
-		meter.CreateChannelReqCount.Add(r.Context(), 1)
+		meter.UpdatePDFPageReqCount.Add(r.Context(), 1)
 
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
@@ -1089,7 +1089,7 @@ func DeletePage(log *slog.Logger, val *validator.Validate, lpService LPService) 
 		)
 
 		meter.AllReqCount.Add(r.Context(), 1)
-		meter.CreateChannelReqCount.Add(r.Context(), 1)
+		meter.DeletePageReqCount.Add(r.Context(), 1)
 
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {

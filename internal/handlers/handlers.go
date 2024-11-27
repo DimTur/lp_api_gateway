@@ -12,6 +12,7 @@ import (
 	planshandler "github.com/DimTur/lp_api_gateway/internal/handlers/learning_platform/plans"
 	questionshandler "github.com/DimTur/lp_api_gateway/internal/handlers/learning_platform/questions"
 	authmiddleware "github.com/DimTur/lp_api_gateway/internal/handlers/middleware/auth"
+	headersmiddleware "github.com/DimTur/lp_api_gateway/internal/handlers/middleware/headers"
 	authhandler "github.com/DimTur/lp_api_gateway/internal/handlers/sso/auth"
 	learninggrouphandler "github.com/DimTur/lp_api_gateway/internal/handlers/sso/learning_group"
 	lpservice "github.com/DimTur/lp_api_gateway/internal/services/lp"
@@ -86,6 +87,8 @@ func (c *ChiRouterConfigurator) ConfigureRouter() http.Handler {
 
 	// Trace and metrics
 	router.Handle("/metrics", promhttp.Handler())
+
+	router.Use(headersmiddleware.SecurityHeadersMiddleware)
 
 	// Auth
 	router.Post("/sing_up", authhandler.SingUp(c.Logger, c.validator, &c.SsoService))

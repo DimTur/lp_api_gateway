@@ -219,7 +219,7 @@ func GetChannels(log *slog.Logger, val *validator.Validate, lpService LPService)
 		)
 
 		meter.AllReqCount.Add(r.Context(), 1)
-		meter.GetChannelReqCount.Add(r.Context(), 1)
+		meter.GetChannelsReqCount.Add(r.Context(), 1)
 
 		uID := r.Header.Get("X-User-ID")
 		if uID == "" {
@@ -297,7 +297,7 @@ func UpdateChannel(log *slog.Logger, val *validator.Validate, lpService LPServic
 		)
 
 		meter.AllReqCount.Add(r.Context(), 1)
-		meter.GetChannelReqCount.Add(r.Context(), 1)
+		meter.UpdateChannelReqCount.Add(r.Context(), 1)
 
 		var req UpdateChannelRequest
 		err := render.DecodeJSON(r.Body, &req)
@@ -385,7 +385,7 @@ func DeleteChannel(log *slog.Logger, val *validator.Validate, lpService LPServic
 		)
 
 		meter.AllReqCount.Add(r.Context(), 1)
-		meter.GetChannelReqCount.Add(r.Context(), 1)
+		meter.DeleteChannelReqCount.Add(r.Context(), 1)
 
 		uID := r.Header.Get("X-User-ID")
 		if uID == "" {
@@ -468,7 +468,7 @@ func ShareChannel(log *slog.Logger, val *validator.Validate, lpService LPService
 		)
 
 		meter.AllReqCount.Add(r.Context(), 1)
-		meter.GetChannelReqCount.Add(r.Context(), 1)
+		meter.ShareChannelReqCount.Add(r.Context(), 1)
 
 		var req ShareChannelRequest
 		err := render.DecodeJSON(r.Body, &req)

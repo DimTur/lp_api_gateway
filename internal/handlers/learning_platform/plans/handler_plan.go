@@ -55,7 +55,7 @@ func CreatePlan(log *slog.Logger, val *validator.Validate, lpService LPService) 
 		)
 
 		meter.AllReqCount.Add(r.Context(), 1)
-		meter.CreateChannelReqCount.Add(r.Context(), 1)
+		meter.CreatePlanReqCount.Add(r.Context(), 1)
 
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
@@ -139,7 +139,7 @@ func GetPlan(log *slog.Logger, val *validator.Validate, lpService LPService) htt
 		)
 
 		meter.AllReqCount.Add(r.Context(), 1)
-		meter.CreateChannelReqCount.Add(r.Context(), 1)
+		meter.GetPlanReqCount.Add(r.Context(), 1)
 
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
@@ -222,7 +222,7 @@ func GetPlans(log *slog.Logger, val *validator.Validate, lpService LPService) ht
 		)
 
 		meter.AllReqCount.Add(r.Context(), 1)
-		meter.CreateChannelReqCount.Add(r.Context(), 1)
+		meter.GetPlansReqCount.Add(r.Context(), 1)
 
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
@@ -306,7 +306,7 @@ func UpdatePlan(log *slog.Logger, val *validator.Validate, lpService LPService) 
 		)
 
 		meter.AllReqCount.Add(r.Context(), 1)
-		meter.CreateChannelReqCount.Add(r.Context(), 1)
+		meter.UpdatePlanReqCount.Add(r.Context(), 1)
 
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
@@ -399,7 +399,7 @@ func DeletePlan(log *slog.Logger, val *validator.Validate, lpService LPService) 
 		)
 
 		meter.AllReqCount.Add(r.Context(), 1)
-		meter.CreateChannelReqCount.Add(r.Context(), 1)
+		meter.DeletePlanReqCount.Add(r.Context(), 1)
 
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
@@ -482,7 +482,7 @@ func SharePlan(log *slog.Logger, val *validator.Validate, lpService LPService) h
 		)
 
 		meter.AllReqCount.Add(r.Context(), 1)
-		meter.CreateChannelReqCount.Add(r.Context(), 1)
+		meter.SharePlanReqCount.Add(r.Context(), 1)
 
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {

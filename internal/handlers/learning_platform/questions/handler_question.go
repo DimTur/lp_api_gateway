@@ -49,7 +49,7 @@ func CreateQuestionPage(log *slog.Logger, val *validator.Validate, lpService LPS
 		)
 
 		meter.AllReqCount.Add(r.Context(), 1)
-		meter.CreateChannelReqCount.Add(r.Context(), 1)
+		meter.CreateQuestionPageReqCount.Add(r.Context(), 1)
 
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
@@ -153,7 +153,7 @@ func GetQuestionPage(log *slog.Logger, val *validator.Validate, lpService LPServ
 		)
 
 		meter.AllReqCount.Add(r.Context(), 1)
-		meter.CreateChannelReqCount.Add(r.Context(), 1)
+		meter.GetQuestionPageReqCount.Add(r.Context(), 1)
 
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
@@ -252,7 +252,7 @@ func UpdateQuestionPage(log *slog.Logger, val *validator.Validate, lpService LPS
 		)
 
 		meter.AllReqCount.Add(r.Context(), 1)
-		meter.CreateChannelReqCount.Add(r.Context(), 1)
+		meter.UpdateQuestionPageReqCount.Add(r.Context(), 1)
 
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {

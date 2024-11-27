@@ -56,7 +56,7 @@ func TryLesson(log *slog.Logger, val *validator.Validate, lpService LPService) h
 		)
 
 		meter.AllReqCount.Add(r.Context(), 1)
-		meter.CreateChannelReqCount.Add(r.Context(), 1)
+		meter.TryLessonReqCount.Add(r.Context(), 1)
 
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
@@ -149,7 +149,7 @@ func UpdatePageAttempt(log *slog.Logger, val *validator.Validate, lpService LPSe
 		)
 
 		meter.AllReqCount.Add(r.Context(), 1)
-		meter.CreateChannelReqCount.Add(r.Context(), 1)
+		meter.UpdatePageAttemptReqCount.Add(r.Context(), 1)
 
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
@@ -233,7 +233,7 @@ func CompleteLesson(log *slog.Logger, val *validator.Validate, lpService LPServi
 		)
 
 		meter.AllReqCount.Add(r.Context(), 1)
-		meter.CreateChannelReqCount.Add(r.Context(), 1)
+		meter.CompleteLessonReqCount.Add(r.Context(), 1)
 
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
@@ -312,7 +312,7 @@ func GetLessonAttempts(log *slog.Logger, val *validator.Validate, lpService LPSe
 		)
 
 		meter.AllReqCount.Add(r.Context(), 1)
-		meter.CreateChannelReqCount.Add(r.Context(), 1)
+		meter.GetLessonAttemptsReqCount.Add(r.Context(), 1)
 
 		uID, err := utils.GetHeaderID(r, "X-User-ID")
 		if err != nil {
