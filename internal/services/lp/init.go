@@ -57,6 +57,13 @@ type QuestionServiceProvider interface {
 	UpdateQuestionPage(ctx context.Context, updQust *lpmodels.UpdateQuestionPage) (*lpmodels.UpdatePageResponse, error)
 }
 
+type AttemptServiceProvider interface {
+	TryLesson(ctx context.Context, lesson *lpmodels.TryLesson) (*lpmodels.TryLessonResp, error)
+	UpdatePageAttempt(ctx context.Context, attempt *lpmodels.UpdatePageAttempt) (*lpmodels.UpdatePageAttemptResp, error)
+	CompleteLesson(ctx context.Context, lesson *lpmodels.CompleteLesson) (*lpmodels.CompleteLessonResp, error)
+	GetLessonAttempts(ctx context.Context, inputParams *lpmodels.GetLessonAttempts) (*lpmodels.GetLessonAttemptsResp, error)
+}
+
 type LgServiceProvider interface {
 	UserIsLearnerIn(ctx context.Context, user *ssomodels.UserIsLearnerIn) ([]string, error)
 }
@@ -73,6 +80,7 @@ type LpService struct {
 	LessonProvider      LessonServiceProvider
 	PageProvider        PageServiceProvider
 	QuestionProvider    QuestionServiceProvider
+	AttemptProvider     AttemptServiceProvider
 	LgServiceProvider   LgServiceProvider
 	PermissionsProvider permissions.PermissionsService
 }
@@ -85,6 +93,7 @@ func New(
 	lessonProvider LessonServiceProvider,
 	pageProvider PageServiceProvider,
 	questionProvider QuestionServiceProvider,
+	attemptProvider AttemptServiceProvider,
 	lgServiceProvider LgServiceProvider,
 	permissionsProvider permissions.PermissionsService,
 ) *LpService {
@@ -96,6 +105,7 @@ func New(
 		LessonProvider:      lessonProvider,
 		PageProvider:        pageProvider,
 		QuestionProvider:    questionProvider,
+		AttemptProvider:     attemptProvider,
 		LgServiceProvider:   lgServiceProvider,
 		PermissionsProvider: permissionsProvider,
 	}

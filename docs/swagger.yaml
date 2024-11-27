@@ -1,5 +1,48 @@
 basePath: /
 definitions:
+  attemptshandler.LessonAttemptsResponse:
+    properties:
+      error:
+        type: string
+      lessonAttempts:
+        items:
+          $ref: '#/definitions/lpmodels.LessonAttempt'
+        type: array
+      status:
+        type: string
+    type: object
+  attemptshandler.TryLessonResponse:
+    properties:
+      error:
+        type: string
+      questionPageAttempts:
+        items:
+          $ref: '#/definitions/lpmodels.QuestionPageAttempt'
+        type: array
+      status:
+        type: string
+    type: object
+  attemptshandler.UpdatePageAttemptRequest:
+    properties:
+      page_id:
+        type: integer
+      question_page_attempt_id:
+        type: integer
+      user_answer:
+        type: string
+    required:
+    - page_id
+    - question_page_attempt_id
+    type: object
+  attemptshandler.UpdatePageAttemptResponse:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+      success:
+        type: boolean
+    type: object
   authhandler.CheckOTPAndLogInResponse:
     properties:
       accsessToken:
@@ -414,6 +457,31 @@ definitions:
       modified:
         type: string
     type: object
+  lpmodels.LessonAttempt:
+    properties:
+      channelID:
+        type: integer
+      endTime:
+        type: string
+      id:
+        type: integer
+      isComplete:
+        type: boolean
+      isSuccessful:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lessonID:
+        type: integer
+      percentageScore:
+        type: integer
+      planID:
+        type: integer
+      startTime:
+        type: string
+      userID:
+        type: string
+    type: object
   lpmodels.PDFPage:
     properties:
       content_type:
@@ -455,6 +523,19 @@ definitions:
         type: string
       public:
         type: boolean
+    type: object
+  lpmodels.QuestionPageAttempt:
+    properties:
+      id:
+        type: integer
+      is_correct:
+        type: boolean
+      lesson_attempt_id:
+        type: integer
+      page_id:
+        type: integer
+      user_answer:
+        type: string
     type: object
   lpmodels.UpdateLessonResponse:
     properties:
@@ -1353,6 +1434,56 @@ paths:
       summary: Update lesson by id
       tags:
       - lessons
+  /channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/attempts:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint allows user, channel, plan, lesson id and create
+        a new lesson attempt with the specified data.
+      parameters:
+      - description: ID of the channel
+        in: path
+        name: channel_id
+        required: true
+        type: integer
+      - description: ID of the plan
+        in: path
+        name: plan_id
+        required: true
+        type: integer
+      - description: ID of the lesson
+        in: path
+        name: lesson_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/attemptshandler.TryLessonResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new lesson attempt or get it if exist not completed
+      tags:
+      - attempts
   /channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/image_page:
     post:
       consumes:
@@ -2666,6 +2797,142 @@ paths:
       summary: Create a new learning group
       tags:
       - learning groups
+  /lessons/{lesson_id}/attempts:
+    get:
+      consumes:
+      - application/json
+      description: This endpoint returns lesson attempts information relevant for
+        user.
+      parameters:
+      - description: ID of the lesson
+        in: path
+        name: lesson_id
+        required: true
+        type: integer
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/attemptshandler.LessonAttemptsResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Lesson attempts not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get all lesson attempts relevant for user
+      tags:
+      - attempts
+  /lessons/attempts/{lesson_attempt_id}:
+    patch:
+      consumes:
+      - application/json
+      description: This endpoint allows question page attempt id and update it.
+      parameters:
+      - description: ID of the lesson attempt
+        in: path
+        name: lesson_attempt_id
+        required: true
+        type: integer
+      - description: Question page attempt updating parameters
+        in: body
+        name: attemptshandler.UpdatePageAttemptRequest
+        required: true
+        schema:
+          $ref: '#/definitions/attemptshandler.UpdatePageAttemptRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/attemptshandler.UpdatePageAttemptResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Question page attempt not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update question page attempt by id
+      tags:
+      - attempts
+  /lessons/attempts/{lesson_attempt_id}/complete:
+    patch:
+      consumes:
+      - application/json
+      description: This endpoint allows lesson attempt id and update it.
+      parameters:
+      - description: ID of the lesson attempt
+        in: path
+        name: lesson_attempt_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/attemptshandler.UpdatePageAttemptResponse'
+        "400":
+          description: Invalid data in the request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Question page attempt not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Complete lesson attempt by id
+      tags:
+      - attempts
   /profile/update_info:
     patch:
       consumes:

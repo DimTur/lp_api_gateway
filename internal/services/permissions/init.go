@@ -18,6 +18,10 @@ type PlanPermissionsProvider interface {
 	IsUserShareWithPlan(ctx context.Context, userPlan *IsUserShareWithPlan) (*lpmodels.IsPlanShareWith, error)
 }
 
+type AttemptPermissionsProvider interface {
+	CheckLessonAttemptPermissions(ctx context.Context, userAtt *lpmodels.LessonAttemptPermissions) (bool, error)
+}
+
 type LgPermissionsProvider interface {
 	UserIsGroupAdminIn(ctx context.Context, user *ssomodels.UserIsGroupAdminIn) ([]string, error)
 	UserIsLearnerIn(ctx context.Context, user *ssomodels.UserIsLearnerIn) ([]string, error)
@@ -35,6 +39,7 @@ type PermissionsService struct {
 	validator                  *validator.Validate
 	channelPermissionsProvider ChannelPermissionsProvider
 	planPermissionsProvider    PlanPermissionsProvider
+	attemptPermissionsProvider AttemptPermissionsProvider
 	lgPermissionsProvider      LgPermissionsProvider
 	redisPermissionsProvider   RedisPermissionsProvider
 }
@@ -44,6 +49,7 @@ func New(
 	validator *validator.Validate,
 	channelPermissionsProvider ChannelPermissionsProvider,
 	planPermissionsProvider PlanPermissionsProvider,
+	attemptPermissionsProvider AttemptPermissionsProvider,
 	lgPermissionsProvider LgPermissionsProvider,
 	redisPermissionsProvider RedisPermissionsProvider,
 ) *PermissionsService {
@@ -52,6 +58,7 @@ func New(
 		validator:                  validator,
 		channelPermissionsProvider: channelPermissionsProvider,
 		planPermissionsProvider:    planPermissionsProvider,
+		attemptPermissionsProvider: attemptPermissionsProvider,
 		lgPermissionsProvider:      lgPermissionsProvider,
 		redisPermissionsProvider:   redisPermissionsProvider,
 	}

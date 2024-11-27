@@ -738,6 +738,81 @@ const docTemplate = `{
                 }
             }
         },
+        "/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/attempts": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "This endpoint allows user, channel, plan, lesson id and create a new lesson attempt with the specified data.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "attempts"
+                ],
+                "summary": "Create a new lesson attempt or get it if exist not completed",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of the channel",
+                        "name": "channel_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the plan",
+                        "name": "plan_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the lesson",
+                        "name": "lesson_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/attemptshandler.TryLessonResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data in the request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/image_page": {
             "post": {
                 "security": [
@@ -2738,6 +2813,216 @@ const docTemplate = `{
                 }
             }
         },
+        "/lessons/attempts/{lesson_attempt_id}": {
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "This endpoint allows question page attempt id and update it.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "attempts"
+                ],
+                "summary": "Update question page attempt by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of the lesson attempt",
+                        "name": "lesson_attempt_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Question page attempt updating parameters",
+                        "name": "attemptshandler.UpdatePageAttemptRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/attemptshandler.UpdatePageAttemptRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/attemptshandler.UpdatePageAttemptResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data in the request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Question page attempt not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/lessons/attempts/{lesson_attempt_id}/complete": {
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "This endpoint allows lesson attempt id and update it.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "attempts"
+                ],
+                "summary": "Complete lesson attempt by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of the lesson attempt",
+                        "name": "lesson_attempt_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/attemptshandler.UpdatePageAttemptResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data in the request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Question page attempt not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/lessons/{lesson_id}/attempts": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "This endpoint returns lesson attempts information relevant for user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "attempts"
+                ],
+                "summary": "Get all lesson attempts relevant for user",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of the lesson",
+                        "name": "lesson_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/attemptshandler.LessonAttemptsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data in the request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Lesson attempts not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/profile/update_info": {
             "patch": {
                 "security": [
@@ -2941,6 +3226,72 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "attemptshandler.LessonAttemptsResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "lessonAttempts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/lpmodels.LessonAttempt"
+                    }
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "attemptshandler.TryLessonResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "questionPageAttempts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/lpmodels.QuestionPageAttempt"
+                    }
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "attemptshandler.UpdatePageAttemptRequest": {
+            "type": "object",
+            "required": [
+                "page_id",
+                "question_page_attempt_id"
+            ],
+            "properties": {
+                "page_id": {
+                    "type": "integer"
+                },
+                "question_page_attempt_id": {
+                    "type": "integer"
+                },
+                "user_answer": {
+                    "type": "string"
+                }
+            }
+        },
+        "attemptshandler.UpdatePageAttemptResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
         "authhandler.CheckOTPAndLogInResponse": {
             "type": "object",
             "properties": {
@@ -3578,6 +3929,44 @@ const docTemplate = `{
                 }
             }
         },
+        "lpmodels.LessonAttempt": {
+            "type": "object",
+            "properties": {
+                "channelID": {
+                    "type": "integer"
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isComplete": {
+                    "type": "boolean"
+                },
+                "isSuccessful": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lessonID": {
+                    "type": "integer"
+                },
+                "percentageScore": {
+                    "type": "integer"
+                },
+                "planID": {
+                    "type": "integer"
+                },
+                "startTime": {
+                    "type": "string"
+                },
+                "userID": {
+                    "type": "string"
+                }
+            }
+        },
         "lpmodels.PDFPage": {
             "type": "object",
             "properties": {
@@ -3639,6 +4028,26 @@ const docTemplate = `{
                 },
                 "public": {
                     "type": "boolean"
+                }
+            }
+        },
+        "lpmodels.QuestionPageAttempt": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "is_correct": {
+                    "type": "boolean"
+                },
+                "lesson_attempt_id": {
+                    "type": "integer"
+                },
+                "page_id": {
+                    "type": "integer"
+                },
+                "user_answer": {
+                    "type": "string"
                 }
             }
         },

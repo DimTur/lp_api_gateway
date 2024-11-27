@@ -83,9 +83,9 @@ func NewServeCmd() *cobra.Command {
 
 			validate := validation.InitValidator()
 
-			permService := permissions.New(log, validate, lpClient, lpClient, ssoClient, redisPerm)
+			permService := permissions.New(log, validate, lpClient, lpClient, lpClient, ssoClient, redisPerm)
 			ssoService := ssoservice.New(log, validate, ssoClient, ssoClient)
-			lpService := lpservice.New(log, validate, lpClient, lpClient, lpClient, lpClient, lpClient, ssoClient, *permService)
+			lpService := lpservice.New(log, validate, lpClient, lpClient, lpClient, lpClient, lpClient, lpClient, ssoClient, *permService)
 
 			application, err := app.NewApp(
 				cfg.HTTPServer.Address,

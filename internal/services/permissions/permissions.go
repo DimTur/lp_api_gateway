@@ -331,3 +331,43 @@ func (p *PermissionsService) CheckCreatorOrAdminAndSharePermissions(ctx context.
 	log.Warn("permissions denied for", slog.String("user_id", perm.UserID))
 	return false, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
 }
+
+func (p *PermissionsService) CheckLessonAttemptPermissions(ctx context.Context, userAtt *lpmodels.LessonAttemptPermissions) (bool, error) {
+	const op = "internal.services.permissions.permissions.CheckCreatorOrAdminAndSharePermissions"
+
+	log := p.log.With(
+		slog.String("op", op),
+		slog.String("user_id", userAtt.UserID),
+		slog.Int64("lesson_attempt_id", userAtt.LessonAttemptID),
+	)
+
+	_, span := tracer.AuthTracer.Start(ctx, "CheckLessonAttemptPermissions")
+	defer span.End()
+
+	span.SetAttributes(
+		attribute.String("user_id", userAtt.UserID),
+		attribute.Int64("plan_id", userAtt.LessonAttemptID),
+	)
+
+	// Validation
+	span.AddEvent("validation_started")
+	if err := p.validator.Struct(userAtt); err != nil {
+		log.Warn("invalid parameters", slog.String("err", err.Error()))
+		return false, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+	}
+	span.AddEvent("validation_completed")
+
+	// Checks that the user is the creator of the attempt
+	log.Info("checks that attempt created by user")
+	span.AddEvent("checking_attemp_created_by_user")
+	perm, err := p.attemptPermissionsProvider.CheckLessonAttemptPermissions(ctx, &lpmodels.LessonAttemptPermissions{
+		UserID:          userAtt.UserID,
+		LessonAttemptID: userAtt.LessonAttemptID,
+	})
+	if err != nil {
+		span.AddEvent("check_attempt_creator_failed", trace.WithAttributes(attribute.String("error", err.Error())))
+		log.Error("can't check that user is attempt creator", slog.String("err", err.Error()))
+	}
+
+	return perm, nil
+}

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	attemptshandler "github.com/DimTur/lp_api_gateway/internal/handlers/learning_platform/attempts"
 	channelshandler "github.com/DimTur/lp_api_gateway/internal/handlers/learning_platform/channels"
 	lessonshandler "github.com/DimTur/lp_api_gateway/internal/handlers/learning_platform/lessons"
 	pageshandler "github.com/DimTur/lp_api_gateway/internal/handlers/learning_platform/pages"
@@ -150,6 +151,12 @@ func (c *ChiRouterConfigurator) ConfigureRouter() http.Handler {
 		r.Post("/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/question_page", questionshandler.CreateQuestionPage(c.Logger, c.validator, &c.LpService))
 		r.Get("/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/question_page/{page_id}", questionshandler.GetQuestionPage(c.Logger, c.validator, &c.LpService))
 		r.Patch("/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/question_page/{page_id}", questionshandler.UpdateQuestionPage(c.Logger, c.validator, &c.LpService))
+
+		// Attempts
+		r.Post("/channels/{channel_id}/plans/{plan_id}/lessons/{lesson_id}/attempts", attemptshandler.TryLesson(c.Logger, c.validator, &c.LpService))
+		r.Patch("/lessons/attempts/{lesson_attempt_id}", attemptshandler.UpdatePageAttempt(c.Logger, c.validator, &c.LpService))
+		r.Patch("/lessons/attempts/{lesson_attempt_id}/complete", attemptshandler.CompleteLesson(c.Logger, c.validator, &c.LpService))
+		r.Get("/lessons/{lesson_id}/attempts", attemptshandler.GetLessonAttempts(c.Logger, c.validator, &c.LpService))
 	})
 
 	return router
