@@ -171,9 +171,104 @@ func (lp *LpService) GetPlans(ctx context.Context, inputParam *lpmodels.GetPlans
 	}
 	span.AddEvent("validation_completed")
 
+	// Start check admin permissions
+	span.AddEvent("checking_permissons_for_user")
+	adminPerm, err := lp.PermissionsProvider.CheckCreatorOrAdminAndSharePermissions(ctx, &permissions.CheckPerm{
+		UserID:    inputParam.UserID,
+		ChannelID: inputParam.ChannelID,
+	})
+	if err != nil {
+		log.Error("can't check permissions", slog.String("err", err.Error()))
+		return nil, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
+	}
+	if adminPerm {
+		log.Info("getting plans")
+		span.AddEvent("started_getting_plans")
+		resp, err := lp.PlanProvider.GetPlansForGroupAdmin(ctx, inputParam)
+		if err != nil {
+			switch {
+			case errors.Is(err, lpgrpc.ErrPlanNotFound):
+				log.Error("plans not found", slog.String("err", err.Error()))
+				return nil, fmt.Errorf("%s: %w", op, ErrPlanNotFound)
+			case errors.Is(err, lpgrpc.ErrInvalidCredentials):
+				log.Error("bad request", slog.String("err", err.Error()))
+				return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+			default:
+				log.Error("failed to get plans", slog.String("err", err.Error()))
+				return nil, fmt.Errorf("%s: %w", op, ErrInternal)
+			}
+		}
+		span.AddEvent("completed_getting_plans")
+
+		return resp, nil
+	}
+
+	// Start check learner permissions
+	perm, err := lp.PermissionsProvider.CheckCreaterOrLearnerAndSharePermissions(ctx, &permissions.CheckPerm{
+		UserID:    inputParam.UserID,
+		ChannelID: inputParam.ChannelID,
+	})
+	if err != nil {
+		log.Error("can't check permissions", slog.String("err", err.Error()))
+		return nil, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
+	}
+	if !perm {
+		log.Info("permissions denied", slog.String("user_id", inputParam.UserID))
+		return nil, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
+	}
+	span.AddEvent("completed_checking_permissons_for_user")
+
+	// Start getting
+	log.Info("getting plans")
+	span.AddEvent("started_getting_plans")
+	resp, err := lp.PlanProvider.GetPlans(ctx, inputParam)
+	if err != nil {
+		switch {
+		case errors.Is(err, lpgrpc.ErrPlanNotFound):
+			log.Error("plans not found", slog.String("err", err.Error()))
+			return nil, fmt.Errorf("%s: %w", op, ErrPlanNotFound)
+		case errors.Is(err, lpgrpc.ErrInvalidCredentials):
+			log.Error("bad request", slog.String("err", err.Error()))
+			return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+		default:
+			log.Error("failed to get plans", slog.String("err", err.Error()))
+			return nil, fmt.Errorf("%s: %w", op, ErrInternal)
+		}
+	}
+	span.AddEvent("completed_getting_plans")
+
+	log.Info("getting plans successfully")
+
+	return resp, nil
+}
+
+func (lp *LpService) GetPlansForGroupAdmin(ctx context.Context, inputParam *lpmodels.GetPlans) ([]lpmodels.GetPlanResponse, error) {
+	const op = "internal.services.lp.plans.GetPlansAll"
+
+	log := lp.Log.With(
+		slog.String("op", op),
+		slog.String("user_id", inputParam.UserID),
+	)
+
+	_, span := tracer.LPtracer.Start(ctx, "GetPlansAll")
+	defer span.End()
+
+	span.SetAttributes(
+		attribute.String("user_id", inputParam.UserID),
+		attribute.Int64("channel", inputParam.ChannelID),
+	)
+
+	// Validation
+	span.AddEvent("validation_started")
+	if err := lp.Validator.Struct(inputParam); err != nil {
+		log.Warn("invalid parameters", slog.String("err", err.Error()))
+		return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+	}
+	span.AddEvent("validation_completed")
+
 	// Start check permissions
 	span.AddEvent("checking_permissons_for_user")
-	perm, err := lp.PermissionsProvider.CheckCreaterOrLearnerAndSharePermissions(ctx, &permissions.CheckPerm{
+	perm, err := lp.PermissionsProvider.CheckCreatorOrAdminAndSharePermissions(ctx, &permissions.CheckPerm{
 		UserID:    inputParam.UserID,
 		ChannelID: inputParam.ChannelID,
 	})

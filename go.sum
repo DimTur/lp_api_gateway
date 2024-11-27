@@ -1,7 +1,7 @@
 github.com/BurntSushi/toml v1.2.1 h1:9F2/+DoOYIOksmaJFPw1tGFy1eDnIJXg+UHjuD8lTak=
 github.com/BurntSushi/toml v1.2.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
-github.com/DimTur/lp_protos v0.3.4 h1:NxUQ4vWfpUC4hf8J28RE/NQKXef5mUOf28zkqskTIfo=
-github.com/DimTur/lp_protos v0.3.4/go.mod h1:RQnLrkhMklS3HjtJNjVKtDYEPYNOIPxS72xBX1Iwrdo=
+github.com/DimTur/lp_protos v0.3.5 h1:gqwvIN4D5CTDwhWrFFx9ItM3vyS/5SaC03NJGD0kwRU=
+github.com/DimTur/lp_protos v0.3.5/go.mod h1:RQnLrkhMklS3HjtJNjVKtDYEPYNOIPxS72xBX1Iwrdo=
 github.com/KyleBanks/depth v1.2.1 h1:5h8fQADFrWtarTdtDudMmGsC7GPbOAu6RVB3ffsVFHc=
 github.com/KyleBanks/depth v1.2.1/go.mod h1:jzSb9d0L43HxTQfT+oSA1EEp2q+ne2uh6XgeJcm8brE=
 github.com/ajg/form v1.5.1 h1:t9c7v8JUKu/XxOGBU0yjNpaMloxGEJhUkqFRq0ibGeU=

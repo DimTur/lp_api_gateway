@@ -3,7 +3,7 @@ module github.com/DimTur/lp_api_gateway
 go 1.23.0
 
 require (
-	github.com/DimTur/lp_protos v0.3.4
+	github.com/DimTur/lp_protos v0.3.5
 	github.com/go-chi/render v1.0.3
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.1.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0

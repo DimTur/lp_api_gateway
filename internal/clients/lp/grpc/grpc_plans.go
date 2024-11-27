@@ -115,6 +115,47 @@ func (c *Client) GetPlans(ctx context.Context, inputParam *lpmodels.GetPlans) ([
 	return planResp, nil
 }
 
+func (c *Client) GetPlansForGroupAdmin(ctx context.Context, inputParam *lpmodels.GetPlans) ([]lpmodels.GetPlanResponse, error) {
+	const op = "lp.grpc.GetPlansAll"
+
+	resp, err := c.api.GetPlans(ctx, &lpv1.GetPlansRequest{
+		UserId:    inputParam.UserID,
+		ChannelId: inputParam.ChannelID,
+		Limit:     inputParam.Limit,
+		Offset:    inputParam.Offset,
+	})
+	if err != nil {
+		switch status.Code(err) {
+		case codes.NotFound:
+			c.log.Error("plans not found", slog.String("err", err.Error()))
+			return nil, fmt.Errorf("%s: %w", op, ErrChannelNotFound)
+		case codes.InvalidArgument:
+			c.log.Error("bad request", slog.String("err", err.Error()))
+			return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+		default:
+			c.log.Error("internal error", slog.String("err", err.Error()))
+			return nil, fmt.Errorf("%s: %w", op, ErrInternal)
+		}
+	}
+
+	var planResp []lpmodels.GetPlanResponse
+	for _, plan := range resp.Plans {
+		planResp = append(planResp, lpmodels.GetPlanResponse{
+			Id:             plan.Id,
+			Name:           plan.Name,
+			Description:    plan.Description,
+			CreatedBy:      plan.CreatedBy,
+			LastModifiedBy: plan.LastModifiedBy,
+			IsPublished:    plan.IsPublished,
+			Public:         plan.Public,
+			CreatedAt:      plan.CreatedAt,
+			Modified:       plan.Modified,
+		})
+	}
+
+	return planResp, nil
+}
+
 func (c *Client) UpdatePlan(ctx context.Context, updPlan *lpmodels.UpdatePlan) (*lpmodels.UpdatePlanResponse, error) {
 	const op = "lp.grpc.UpdatePlan"
 
