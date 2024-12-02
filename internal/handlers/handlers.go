@@ -76,6 +76,7 @@ func (c *ChiRouterConfigurator) ConfigureRouter() http.Handler {
 		AllowCredentials: false,
 		MaxAge:           300,
 	}))
+	router.Use(headersmiddleware.SecurityHeadersMiddleware)
 
 	// Routes
 	//
@@ -87,8 +88,6 @@ func (c *ChiRouterConfigurator) ConfigureRouter() http.Handler {
 
 	// Trace and metrics
 	router.Handle("/metrics", promhttp.Handler())
-
-	router.Use(headersmiddleware.SecurityHeadersMiddleware)
 
 	// Auth
 	router.Post("/sing_up", authhandler.SingUp(c.Logger, c.validator, &c.SsoService))

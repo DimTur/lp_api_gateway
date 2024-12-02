@@ -11,7 +11,7 @@ import (
 
 type ChannelPermissionsProvider interface {
 	IsChannelCreator(ctx context.Context, isCC *lpmodels.IsChannelCreator) (*lpmodels.IsChannelCreatorResp, error)
-	LerningGroupsShareWithChannel(ctx context.Context, channelID *lpmodels.LerningGroupsShareWithChannel) ([]string, error)
+	LerningGroupsShareWithChannel(ctx context.Context, channelID *lpmodels.LerningGroupsShareWithChannel) (*lpmodels.LerningGroupsShareWithChannelResp, error)
 }
 
 type PlanPermissionsProvider interface {

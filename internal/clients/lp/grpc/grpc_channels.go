@@ -241,7 +241,7 @@ func (c *Client) IsChannelCreator(ctx context.Context, isCC *lpmodels.IsChannelC
 	}, nil
 }
 
-func (c *Client) LerningGroupsShareWithChannel(ctx context.Context, channelID *lpmodels.LerningGroupsShareWithChannel) ([]string, error) {
+func (c *Client) LerningGroupsShareWithChannel(ctx context.Context, channelID *lpmodels.LerningGroupsShareWithChannel) (*lpmodels.LerningGroupsShareWithChannelResp, error) {
 	const op = "lp.grpc.LerningGroupsShareWithChannel"
 
 	resp, err := c.api.GetLearningGroupsShareWithChannel(ctx, &lpv1.GetLearningGroupsShareWithChannelRequest{
@@ -251,12 +251,14 @@ func (c *Client) LerningGroupsShareWithChannel(ctx context.Context, channelID *l
 		switch status.Code(err) {
 		case codes.InvalidArgument:
 			c.log.Error("bad request", slog.String("err", err.Error()))
-			return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+			return &lpmodels.LerningGroupsShareWithChannelResp{}, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 		default:
 			c.log.Error("internal error", slog.String("err", err.Error()))
-			return nil, fmt.Errorf("%s: %w", op, ErrInternal)
+			return &lpmodels.LerningGroupsShareWithChannelResp{}, fmt.Errorf("%s: %w", op, ErrInternal)
 		}
 	}
 
-	return resp.LearningGroupIds, nil
+	return &lpmodels.LerningGroupsShareWithChannelResp{
+		LearningGroupIDs: resp.LearningGroupIds,
+	}, nil
 }

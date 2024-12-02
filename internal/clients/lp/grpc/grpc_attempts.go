@@ -145,7 +145,6 @@ func (c *Client) GetLessonAttempts(ctx context.Context, inputParams *lpmodels.Ge
 			ChannelID:       attempt.ChannelId,
 			StartTime:       attempt.StartTime,
 			EndTime:         attempt.EndTime,
-			LastModifiedBy:  attempt.LastModifiedBy,
 			IsComplete:      attempt.IsComplete,
 			IsSuccessful:    attempt.IsSuccessful,
 			PercentageScore: attempt.PercentageScore,

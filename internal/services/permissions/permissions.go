@@ -152,7 +152,7 @@ func (p *PermissionsService) CheckCreaterOrLearnerAndSharePermissions(ctx contex
 
 	// Save to Redis
 	span.AddEvent("save_shared_groups_to_redis_started")
-	if err := p.redisPermissionsProvider.SaveLgShareWithChannel(ctx, perm.ChannelID, lgShareWithChannel); err != nil {
+	if err := p.redisPermissionsProvider.SaveLgShareWithChannel(ctx, perm.ChannelID, lgShareWithChannel.LearningGroupIDs); err != nil {
 		span.AddEvent("save_shared_groups_to_redis_failed", trace.WithAttributes(attribute.String("error", err.Error())))
 		log.Error("can't save learning group ids with which the channel has been sharing", slog.String("err", err.Error()))
 	}
@@ -284,7 +284,7 @@ func (p *PermissionsService) CheckCreatorOrAdminAndSharePermissions(ctx context.
 
 	// Save to Redis
 	span.AddEvent("save_shared_groups_to_redis_started")
-	if err := p.redisPermissionsProvider.SaveLgShareWithChannel(ctx, perm.ChannelID, lgShareWithChannel); err != nil {
+	if err := p.redisPermissionsProvider.SaveLgShareWithChannel(ctx, perm.ChannelID, lgShareWithChannel.LearningGroupIDs); err != nil {
 		span.AddEvent("save_shared_groups_to_redis_failed", trace.WithAttributes(attribute.String("error", err.Error())))
 		log.Error("can't save learning group ids with which the channel has been sharing", slog.String("err", err.Error()))
 	}

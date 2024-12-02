@@ -133,3 +133,7 @@ type IsChannelCreatorResp struct {
 type LerningGroupsShareWithChannel struct {
 	ChannelID int64 `json:"channel_id" validate:"required"`
 }
+
+type LerningGroupsShareWithChannelResp struct {
+	LearningGroupIDs []string
+}

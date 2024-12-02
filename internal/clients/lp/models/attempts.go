@@ -45,8 +45,8 @@ type CompleteLessonResp struct {
 type GetLessonAttempts struct {
 	UserID   string `json:"user_id" validate:"required"`
 	LessonID int64  `json:"lesson_id,omitempty"`
-	Limit    int64  `json:"limit" validate:"required"`
-	Offset   int64  `json:"offset" validate:"required"`
+	Limit    int64  `json:"limit,omitempty" validate:"min=1"`
+	Offset   int64  `json:"offset,omitempty" validate:"min=0"`
 }
 
 type LessonAttempt struct {
@@ -57,7 +57,6 @@ type LessonAttempt struct {
 	ChannelID       int64
 	StartTime       string
 	EndTime         string
-	LastModifiedBy  string
 	IsComplete      bool
 	IsSuccessful    bool
 	PercentageScore int64

@@ -181,6 +181,7 @@ func (lp *LpService) GetPlans(ctx context.Context, inputParam *lpmodels.GetPlans
 		log.Error("can't check permissions", slog.String("err", err.Error()))
 		return nil, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
 	}
+	fmt.Println("adminPerm", adminPerm)
 	if adminPerm {
 		log.Info("getting plans")
 		span.AddEvent("started_getting_plans")

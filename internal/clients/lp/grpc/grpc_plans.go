@@ -118,7 +118,7 @@ func (c *Client) GetPlans(ctx context.Context, inputParam *lpmodels.GetPlans) ([
 func (c *Client) GetPlansForGroupAdmin(ctx context.Context, inputParam *lpmodels.GetPlans) ([]lpmodels.GetPlanResponse, error) {
 	const op = "lp.grpc.GetPlansAll"
 
-	resp, err := c.api.GetPlans(ctx, &lpv1.GetPlansRequest{
+	resp, err := c.api.GetPlansAll(ctx, &lpv1.GetPlansRequest{
 		UserId:    inputParam.UserID,
 		ChannelId: inputParam.ChannelID,
 		Limit:     inputParam.Limit,

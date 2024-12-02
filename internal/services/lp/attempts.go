@@ -40,7 +40,7 @@ func (lp *LpService) TryLesson(ctx context.Context, lesson *lpmodels.TryLesson) 
 	span.AddEvent("validation_started")
 	if err := lp.Validator.Struct(lesson); err != nil {
 		log.Warn("invalid parameters", slog.String("err", err.Error()))
-		return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+		return &lpmodels.TryLessonResp{}, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 	}
 	span.AddEvent("validation_completed")
 
@@ -55,11 +55,11 @@ func (lp *LpService) TryLesson(ctx context.Context, lesson *lpmodels.TryLesson) 
 	})
 	if err != nil {
 		log.Error("can't check permissions", slog.String("err", err.Error()))
-		return nil, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
+		return &lpmodels.TryLessonResp{}, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
 	}
 	if !p {
 		log.Info("permissions denied", slog.String("user_id", lesson.UserID))
-		return nil, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
+		return &lpmodels.TryLessonResp{}, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
 	}
 	span.AddEvent("completed_checking_permissons_for_user")
 
@@ -71,13 +71,13 @@ func (lp *LpService) TryLesson(ctx context.Context, lesson *lpmodels.TryLesson) 
 		switch {
 		case errors.Is(err, lpgrpc.ErrQuestionPageAttemtNotFound):
 			log.Error("question page attempt not found", slog.Any("lesson_id", lesson.LessonID))
-			return nil, fmt.Errorf("%s: %w", op, ErrQuestionPageAttemtNotFound)
+			return &lpmodels.TryLessonResp{}, fmt.Errorf("%s: %w", op, ErrQuestionPageAttemtNotFound)
 		case errors.Is(err, lpgrpc.ErrInvalidCredentials):
 			log.Error("invalid credentials", slog.String("err", err.Error()))
-			return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+			return &lpmodels.TryLessonResp{}, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 		default:
 			log.Error("internal error", slog.String("err", err.Error()))
-			return nil, fmt.Errorf("%s: %w", op, ErrInternal)
+			return &lpmodels.TryLessonResp{}, fmt.Errorf("%s: %w", op, ErrInternal)
 		}
 	}
 	span.AddEvent("completed_trying_lesson")
@@ -108,7 +108,7 @@ func (lp *LpService) UpdatePageAttempt(ctx context.Context, attempt *lpmodels.Up
 	span.AddEvent("validation_started")
 	if err := lp.Validator.Struct(attempt); err != nil {
 		log.Warn("invalid parameters", slog.String("err", err.Error()))
-		return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+		return &lpmodels.UpdatePageAttemptResp{}, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 	}
 	span.AddEvent("validation_completed")
 
@@ -122,11 +122,11 @@ func (lp *LpService) UpdatePageAttempt(ctx context.Context, attempt *lpmodels.Up
 	})
 	if err != nil {
 		log.Error("can't check permissions", slog.String("err", err.Error()))
-		return nil, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
+		return &lpmodels.UpdatePageAttemptResp{}, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
 	}
 	if !p {
 		log.Info("permissions denied", slog.String("user_id", attempt.UserID))
-		return nil, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
+		return &lpmodels.UpdatePageAttemptResp{}, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
 	}
 	span.AddEvent("completed_checking_attempt_permissons_for_user")
 
@@ -138,13 +138,13 @@ func (lp *LpService) UpdatePageAttempt(ctx context.Context, attempt *lpmodels.Up
 		switch {
 		case errors.Is(err, lpgrpc.ErrInvalidCredentials):
 			log.Error("bad request", slog.String("err", err.Error()))
-			return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+			return &lpmodels.UpdatePageAttemptResp{}, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 		case errors.Is(err, lpgrpc.ErrAnswerNotFound):
 			log.Error("question page attempt not found", slog.String("err", err.Error()))
-			return nil, fmt.Errorf("%s: %w", op, ErrAnswerNotFound)
+			return &lpmodels.UpdatePageAttemptResp{}, fmt.Errorf("%s: %w", op, ErrAnswerNotFound)
 		default:
 			log.Error("failed to update question page attempt", slog.String("err", err.Error()))
-			return nil, fmt.Errorf("%s: %w", op, ErrInternal)
+			return &lpmodels.UpdatePageAttemptResp{}, fmt.Errorf("%s: %w", op, ErrInternal)
 		}
 	}
 	span.AddEvent("completed_updating_question_page_attempt")
@@ -175,7 +175,7 @@ func (lp *LpService) CompleteLesson(ctx context.Context, lesson *lpmodels.Comple
 	span.AddEvent("validation_started")
 	if err := lp.Validator.Struct(lesson); err != nil {
 		log.Warn("invalid parameters", slog.String("err", err.Error()))
-		return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+		return &lpmodels.CompleteLessonResp{}, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 	}
 	span.AddEvent("validation_completed")
 
@@ -189,11 +189,11 @@ func (lp *LpService) CompleteLesson(ctx context.Context, lesson *lpmodels.Comple
 	})
 	if err != nil {
 		log.Error("can't check permissions", slog.String("err", err.Error()))
-		return nil, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
+		return &lpmodels.CompleteLessonResp{}, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
 	}
 	if !p {
 		log.Info("permissions denied", slog.String("user_id", lesson.UserID))
-		return nil, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
+		return &lpmodels.CompleteLessonResp{}, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
 	}
 	span.AddEvent("completed_checking_attempt_permissons_for_user")
 
@@ -205,13 +205,13 @@ func (lp *LpService) CompleteLesson(ctx context.Context, lesson *lpmodels.Comple
 		switch {
 		case errors.Is(err, lpgrpc.ErrInvalidCredentials):
 			log.Error("bad request", slog.String("err", err.Error()))
-			return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+			return &lpmodels.CompleteLessonResp{}, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 		case errors.Is(err, lpgrpc.ErrQuestionPageAttemtNotFound):
 			log.Error("question page attempt not found", slog.String("err", err.Error()))
-			return nil, fmt.Errorf("%s: %w", op, ErrQuestionPageAttemtNotFound)
+			return &lpmodels.CompleteLessonResp{}, fmt.Errorf("%s: %w", op, ErrQuestionPageAttemtNotFound)
 		default:
 			log.Error("internal error", slog.String("err", err.Error()))
-			return nil, fmt.Errorf("%s: %w", op, ErrInternal)
+			return &lpmodels.CompleteLessonResp{}, fmt.Errorf("%s: %w", op, ErrInternal)
 		}
 	}
 	span.AddEvent("completed_lesson_attempt")
@@ -236,11 +236,10 @@ func (lp *LpService) GetLessonAttempts(ctx context.Context, inputParams *lpmodel
 		attribute.String("user_id", inputParams.UserID),
 	)
 
-	// Validation
 	span.AddEvent("validation_started")
 	if err := lp.Validator.Struct(inputParams); err != nil {
 		log.Warn("invalid parameters", slog.String("err", err.Error()))
-		return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+		return &lpmodels.GetLessonAttemptsResp{}, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 	}
 	span.AddEvent("validation_completed")
 
@@ -254,13 +253,13 @@ func (lp *LpService) GetLessonAttempts(ctx context.Context, inputParams *lpmodel
 		switch {
 		case errors.Is(err, lpgrpc.ErrInvalidCredentials):
 			log.Error("bad request", slog.String("err", err.Error()))
-			return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+			return &lpmodels.GetLessonAttemptsResp{}, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 		case errors.Is(err, lpgrpc.ErrLessonAttemtNotFound):
 			log.Error("lesson attempt not found", slog.String("err", err.Error()))
-			return nil, fmt.Errorf("%s: %w", op, ErrLessonAttemtNotFound)
+			return &lpmodels.GetLessonAttemptsResp{}, fmt.Errorf("%s: %w", op, ErrLessonAttemtNotFound)
 		default:
 			log.Error("internal error", slog.String("err", err.Error()))
-			return nil, fmt.Errorf("%s: %w", op, ErrInternal)
+			return &lpmodels.GetLessonAttemptsResp{}, fmt.Errorf("%s: %w", op, ErrInternal)
 		}
 	}
 	span.AddEvent("completed_getting_lesson_attempts")
