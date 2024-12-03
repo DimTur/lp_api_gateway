@@ -177,9 +177,10 @@ func (lp *LpService) GetPlans(ctx context.Context, inputParam *lpmodels.GetPlans
 		UserID:    inputParam.UserID,
 		ChannelID: inputParam.ChannelID,
 	})
+	fmt.Println("err", err)
 	if err != nil {
 		log.Error("can't check permissions", slog.String("err", err.Error()))
-		return nil, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
+		// return nil, fmt.Errorf("%s: %w", op, ErrPermissionDenied)
 	}
 	fmt.Println("adminPerm", adminPerm)
 	if adminPerm {
@@ -189,13 +190,13 @@ func (lp *LpService) GetPlans(ctx context.Context, inputParam *lpmodels.GetPlans
 		if err != nil {
 			switch {
 			case errors.Is(err, lpgrpc.ErrPlanNotFound):
-				log.Error("plans not found", slog.String("err", err.Error()))
+				log.Info("plans not found", slog.String("err", err.Error()))
 				return nil, fmt.Errorf("%s: %w", op, ErrPlanNotFound)
 			case errors.Is(err, lpgrpc.ErrInvalidCredentials):
-				log.Error("bad request", slog.String("err", err.Error()))
+				log.Info("bad request", slog.String("err", err.Error()))
 				return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 			default:
-				log.Error("failed to get plans", slog.String("err", err.Error()))
+				log.Info("failed to get plans", slog.String("err", err.Error()))
 				return nil, fmt.Errorf("%s: %w", op, ErrInternal)
 			}
 		}
@@ -226,13 +227,13 @@ func (lp *LpService) GetPlans(ctx context.Context, inputParam *lpmodels.GetPlans
 	if err != nil {
 		switch {
 		case errors.Is(err, lpgrpc.ErrPlanNotFound):
-			log.Error("plans not found", slog.String("err", err.Error()))
+			log.Info("plans not found", slog.String("err", err.Error()))
 			return nil, fmt.Errorf("%s: %w", op, ErrPlanNotFound)
 		case errors.Is(err, lpgrpc.ErrInvalidCredentials):
-			log.Error("bad request", slog.String("err", err.Error()))
+			log.Info("bad request", slog.String("err", err.Error()))
 			return nil, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 		default:
-			log.Error("failed to get plans", slog.String("err", err.Error()))
+			log.Info("failed to get plans", slog.String("err", err.Error()))
 			return nil, fmt.Errorf("%s: %w", op, ErrInternal)
 		}
 	}
